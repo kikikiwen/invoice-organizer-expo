@@ -45,12 +45,6 @@
           "cameraPermission": "Pour photographier et organiser vos factures"
         }
       ],
-      [
-        "expo-image-picker",
-        {
-          "cameraPermission": "Pour photographier et organiser vos factures"
-        }
-      ],
       "expo-sharing",
       "expo-image"
     ]

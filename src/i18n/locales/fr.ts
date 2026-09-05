@@ -32,6 +32,7 @@ export const fr: Strings = {
   cameraPermissionMessage: "Pour photographier et organiser vos factures",
   errorTitle: "Échec",
   savePhotoFailed: "Échec de l'enregistrement de la photo",
+  deletePdfFailed: "Échec de la suppression du PDF",
   selectAtLeastOnePhoto: "Sélectionnez au moins une photo",
   pdfGenerated: "PDF généré",
   pdfGenerateFailed: "Échec de la génération du PDF",

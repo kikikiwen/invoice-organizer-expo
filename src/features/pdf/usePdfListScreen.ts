@@ -52,7 +52,7 @@ export function usePdfListScreen() {
             } catch (error) {
               Alert.alert(
                 strings.errorTitle,
-                error instanceof Error ? error.message : strings.pdfGenerateFailed,
+                error instanceof Error ? error.message : strings.deletePdfFailed,
               );
             } finally {
               setWorking(false);

@@ -30,6 +30,7 @@ export type Strings = {
   cameraPermissionMessage: string;
   errorTitle: string;
   savePhotoFailed: string;
+  deletePdfFailed: string;
   selectAtLeastOnePhoto: string;
   pdfGenerated: string;
   pdfGenerateFailed: string;

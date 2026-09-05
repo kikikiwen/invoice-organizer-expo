@@ -19,7 +19,7 @@
     "production": {
       "ios": {},
       "android": {
-        "track": "internal"
+        "track": "production"
       }
     }
   }

@@ -30,6 +30,7 @@ export const zh: Strings = {
   cameraPermissionMessage: "用于拍摄并整理您的发票",
   errorTitle: "操作失败",
   savePhotoFailed: "照片保存失败",
+  deletePdfFailed: "PDF 删除失败",
   selectAtLeastOnePhoto: "请至少选择一张照片",
   pdfGenerated: "PDF 已生成",
   pdfGenerateFailed: "PDF 生成失败",
