@@ -28,7 +28,9 @@
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundColor": "#E6F4FE"
       },
-      "permissions": ["CAMERA"],
+      "permissions": [
+        "CAMERA"
+      ],
       "predictiveBackGestureEnabled": false
     },
     "web": {
@@ -49,7 +51,8 @@
           "cameraPermission": "Pour photographier et organiser vos factures"
         }
       ],
-      "expo-sharing"
+      "expo-sharing",
+      "expo-image"
     ]
   }
 }

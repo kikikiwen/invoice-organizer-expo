@@ -16,7 +16,7 @@ import { useLocale } from "../src/i18n";
 
 export default function HomeScreen() {
   const insets = useSafeAreaInsets();
-  const { languageButtonLabel, toggleLocale } = useLocale();
+  const { locale, toggleLocale } = useLocale();
   const album = useAlbumScreen();
 
   if (!album.ready) {
@@ -27,15 +27,18 @@ export default function HomeScreen() {
     <View style={styles.container}>
       <Stack.Screen options={{ headerShown: false }} />
 
-      <AlbumHeader title={album.strings.albumTitle} topInset={insets.top} />
+      <AlbumHeader
+        title={album.strings.albumTitle}
+        topInset={insets.top}
+        locale={locale}
+        onToggleLanguage={toggleLocale}
+      />
 
       <AlbumToolbar
-        pdfLabel="PDF"
-        languageLabel={languageButtonLabel}
+        historyLabel={album.strings.history}
         selectLabel={album.strings.select}
         cancelLabel={album.strings.cancel}
         selectionMode={album.selectionMode}
-        onToggleLanguage={toggleLocale}
         onToggleSelection={album.toggleSelectionMode}
       />
 

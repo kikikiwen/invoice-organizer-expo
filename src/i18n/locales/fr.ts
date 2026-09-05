@@ -3,7 +3,8 @@ import type { Strings } from "../types";
 export const fr: Strings = {
   appName: "Factures",
   albumTitle: "Album de factures",
-  pdfListTitle: "PDF générés",
+  history: "Historique",
+  pdfListTitle: "Historique",
   select: "Sélectionner",
   cancel: "Annuler",
   confirm: "Confirmer",
@@ -11,6 +12,8 @@ export const fr: Strings = {
   confirmDeleteTitle: "Confirmer la suppression",
   confirmDeleteMessage: (count) =>
     `Supprimer ${count} photo${count > 1 ? "s" : ""} sélectionnée${count > 1 ? "s" : ""} ?`,
+  confirmDeletePdfMessage: (count) =>
+    `Supprimer ${count} PDF sélectionné${count > 1 ? "s" : ""} ?`,
   retake: "Reprendre",
   usePhoto: "Utiliser la photo",
   photo: "Photo",

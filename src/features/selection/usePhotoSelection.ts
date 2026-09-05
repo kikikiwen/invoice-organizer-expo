@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 
 import type { InvoicePhoto } from "../../types/invoice";
 
@@ -11,12 +11,12 @@ export function usePhotoSelection(photos: InvoicePhoto[]) {
     [photos, selectedIds],
   );
 
-  const toggleSelectionMode = () => {
+  const toggleSelectionMode = useCallback(() => {
     setSelectionMode((current) => !current);
     setSelectedIds(new Set());
-  };
+  }, []);
 
-  const toggleSelect = (photoId: string) => {
+  const toggleSelect = useCallback((photoId: string) => {
     setSelectedIds((current) => {
       const next = new Set(current);
       if (next.has(photoId)) {
@@ -26,12 +26,12 @@ export function usePhotoSelection(photos: InvoicePhoto[]) {
       }
       return next;
     });
-  };
+  }, []);
 
-  const clearSelection = () => {
+  const clearSelection = useCallback(() => {
     setSelectedIds(new Set());
     setSelectionMode(false);
-  };
+  }, []);
 
   return {
     selectionMode,

@@ -3,6 +3,7 @@ import * as FileSystem from "expo-file-system/legacy";
 import { PHOTO_EXTENSIONS } from "../constants/media";
 import { listDirectoryFiles } from "../storage/listDirectoryFiles";
 import { ensurePhotosDir, photosDir } from "../storage/paths";
+import { measureAsync } from "../utils/perf";
 import type { InvoicePhoto } from "../types/invoice";
 import { photoFileName } from "../utils/fileNames";
 import { compressForSave } from "./imageCompression";
@@ -13,9 +14,11 @@ function toInvoicePhoto(uri: string): InvoicePhoto {
 }
 
 export async function listPhotos(): Promise<InvoicePhoto[]> {
-  await ensurePhotosDir();
-  const uris = await listDirectoryFiles(photosDir(), PHOTO_EXTENSIONS);
-  return uris.map(toInvoicePhoto);
+  return measureAsync("listPhotos", async () => {
+    await ensurePhotosDir();
+    const uris = await listDirectoryFiles(photosDir(), PHOTO_EXTENSIONS);
+    return uris.map(toInvoicePhoto);
+  });
 }
 
 export async function savePhoto(captureUri: string): Promise<void> {

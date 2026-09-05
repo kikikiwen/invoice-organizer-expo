@@ -3,7 +3,7 @@ import { Alert } from "react-native";
 import { useRouter } from "expo-router";
 
 import { useI18n } from "../../i18n";
-import { pdfUriFromId, recreateCompressedPdf } from "../../services/pdfMetadataService";
+import { pdfUriFromId, ensureCompressedPdf } from "../../services/pdfMetadataService";
 import { getFileSize } from "../../storage/getFileSize";
 import { sharePdfOrNotifyGenerated } from "../../services/shareService";
 
@@ -34,7 +34,7 @@ export function usePdfPreviewScreen(pdfId: string | undefined) {
 
     try {
       const uri = pdfUriFromId(pdfId);
-      const compressedUri = await recreateCompressedPdf(uri);
+      const compressedUri = await ensureCompressedPdf(uri);
       const size = await getFileSize(compressedUri);
       setPdfUri(compressedUri);
       setPdfName(pdfId.replace(/\.pdf$/i, ""));

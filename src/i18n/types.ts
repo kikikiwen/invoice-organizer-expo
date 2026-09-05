@@ -3,6 +3,7 @@ export type AppLocale = "fr" | "zh";
 export type Strings = {
   appName: string;
   albumTitle: string;
+  history: string;
   pdfListTitle: string;
   select: string;
   cancel: string;
@@ -10,6 +11,7 @@ export type Strings = {
   delete: string;
   confirmDeleteTitle: string;
   confirmDeleteMessage: (count: number) => string;
+  confirmDeletePdfMessage: (count: number) => string;
   retake: string;
   usePhoto: string;
   photo: string;

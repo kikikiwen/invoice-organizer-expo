@@ -15,7 +15,6 @@ type I18nContextValue = {
   locale: AppLocale;
   setLocale: (locale: AppLocale) => void;
   toggleLocale: () => void;
-  languageButtonLabel: string;
 };
 
 const I18nContext = createContext<I18nContextValue | null>(null);
@@ -30,7 +29,6 @@ export function I18nProvider({ children }: { children: ReactNode }) {
       locale,
       setLocale,
       toggleLocale: () => setLocale(locale === "fr" ? "zh" : "fr"),
-      languageButtonLabel: locale === "fr" ? "中文" : "FR",
     };
   }, [locale]);
 
@@ -54,6 +52,5 @@ export function useLocale() {
     locale: context.locale,
     setLocale: context.setLocale,
     toggleLocale: context.toggleLocale,
-    languageButtonLabel: context.languageButtonLabel,
   };
 }

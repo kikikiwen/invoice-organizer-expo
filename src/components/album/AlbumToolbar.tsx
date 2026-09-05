@@ -2,35 +2,27 @@ import { Link } from "expo-router";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
 type AlbumToolbarProps = {
-  pdfLabel: string;
-  languageLabel: string;
+  historyLabel: string;
   selectLabel: string;
   cancelLabel: string;
   selectionMode: boolean;
-  onToggleLanguage: () => void;
   onToggleSelection: () => void;
 };
 
 export function AlbumToolbar({
-  pdfLabel,
-  languageLabel,
+  historyLabel,
   selectLabel,
   cancelLabel,
   selectionMode,
-  onToggleLanguage,
   onToggleSelection,
 }: AlbumToolbarProps) {
   return (
     <View style={styles.container}>
       <Link href="/pdfs" asChild>
         <Pressable style={styles.sideButton}>
-          <Text style={styles.buttonText}>{pdfLabel}</Text>
+          <Text style={styles.buttonText}>{historyLabel}</Text>
         </Pressable>
       </Link>
-
-      <Pressable style={styles.centerButton} onPress={onToggleLanguage}>
-        <Text style={styles.buttonText}>{languageLabel}</Text>
-      </Pressable>
 
       <Pressable
         style={[styles.sideButton, styles.alignEnd]}
@@ -48,6 +40,7 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "space-between",
     paddingHorizontal: 16,
     paddingVertical: 10,
     borderBottomWidth: StyleSheet.hairlineWidth,
@@ -55,15 +48,10 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
   },
   sideButton: {
-    flex: 1,
     alignItems: "flex-start",
   },
   alignEnd: {
     alignItems: "flex-end",
-  },
-  centerButton: {
-    flex: 1,
-    alignItems: "center",
   },
   buttonText: {
     color: "#2563EB",

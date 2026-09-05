@@ -4,6 +4,7 @@ import * as FileSystem from "expo-file-system/legacy";
 import { WebView } from "react-native-webview";
 
 import { LoadingScreen } from "../common/LoadingScreen";
+import { measureAsync } from "../../utils/perf";
 
 type PdfViewerProps = {
   uri: string;
@@ -70,7 +71,9 @@ export function PdfViewer({ uri }: PdfViewerProps) {
         return;
       }
 
-      const nextSource = await loadBase64Source(uri);
+      const nextSource = await measureAsync("pdfViewer.loadBase64", () =>
+        loadBase64Source(uri),
+      );
       if (!cancelled) {
         setSource(nextSource);
       }
