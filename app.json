@@ -18,6 +18,7 @@
         "CFBundleDevelopmentRegion": "fr",
         "CFBundleAllowMixedLocalizations": true,
         "NSCameraUsageDescription": "Pour photographier et organiser vos factures",
+        "ITSAppUsesNonExemptEncryption": false,
         "UIFileSharingEnabled": true,
         "LSSupportsOpeningDocumentsInPlace": true
       }
@@ -29,7 +30,9 @@
         "backgroundColor": "#E6F4FE"
       },
       "permissions": [
-        "CAMERA"
+        "CAMERA",
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO"
       ],
       "predictiveBackGestureEnabled": false
     },
@@ -47,6 +50,13 @@
       ],
       "expo-sharing",
       "expo-image"
-    ]
+    ],
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "1bd521ea-94f9-457e-98b7-8cb87ad2848b"
+      }
+    },
+    "owner": "kikiwen"
   }
 }
