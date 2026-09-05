@@ -24,9 +24,9 @@ export default function PdfListScreen() {
       ) : (
         <PdfListView
           pdfs={pdfList.pdfs}
-          shareLabel={pdfList.strings.share}
-          sharingId={pdfList.sharingId}
-          onShare={pdfList.sharePdf}
+          openLabel={pdfList.strings.preview}
+          openingId={pdfList.openingId}
+          onOpen={pdfList.openPdf}
         />
       )}
     </>

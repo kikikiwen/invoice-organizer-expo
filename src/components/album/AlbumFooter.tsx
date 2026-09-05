@@ -3,6 +3,7 @@ import { Pressable, StyleSheet, Text, View } from "react-native";
 type AlbumFooterProps = {
   photoLabel: string;
   deleteLabel: string;
+  previewLabel: string;
   doneLabel: string;
   generatingLabel: string;
   selectionMode: boolean;
@@ -11,12 +12,14 @@ type AlbumFooterProps = {
   bottomInset: number;
   onOpenCamera: () => void;
   onDeleteSelected: () => void;
+  onPreviewPdf: () => void;
   onMakePdf: () => void;
 };
 
 export function AlbumFooter({
   photoLabel,
   deleteLabel,
+  previewLabel,
   doneLabel,
   generatingLabel,
   selectionMode,
@@ -25,6 +28,7 @@ export function AlbumFooter({
   bottomInset,
   onOpenCamera,
   onDeleteSelected,
+  onPreviewPdf,
   onMakePdf,
 }: AlbumFooterProps) {
   return (
@@ -40,6 +44,18 @@ export function AlbumFooter({
             disabled={selectedCount === 0 || working}
           >
             <Text style={styles.deleteButtonText}>{deleteLabel}</Text>
+          </Pressable>
+          <Pressable
+            style={[
+              styles.previewButton,
+              (selectedCount === 0 || working) && styles.buttonDisabled,
+            ]}
+            onPress={onPreviewPdf}
+            disabled={selectedCount === 0 || working}
+          >
+            <Text style={styles.previewButtonText}>
+              {working ? generatingLabel : previewLabel}
+            </Text>
           </Pressable>
           <Pressable
             style={[
@@ -104,7 +120,19 @@ const styles = StyleSheet.create({
   deleteButtonText: {
     color: "#FFFFFF",
     fontWeight: "700",
-    fontSize: 16,
+    fontSize: 14,
+  },
+  previewButton: {
+    flex: 1,
+    backgroundColor: "#2563EB",
+    borderRadius: 12,
+    paddingVertical: 14,
+    alignItems: "center",
+  },
+  previewButtonText: {
+    color: "#FFFFFF",
+    fontWeight: "700",
+    fontSize: 14,
   },
   doneButton: {
     flex: 1,
@@ -116,7 +144,7 @@ const styles = StyleSheet.create({
   doneButtonText: {
     color: "#FFFFFF",
     fontWeight: "700",
-    fontSize: 16,
+    fontSize: 14,
   },
   buttonDisabled: {
     opacity: 0.5,

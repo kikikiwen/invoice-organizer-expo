@@ -21,6 +21,8 @@ export type Strings = {
   emptyPdfsDescription: string;
   share: string;
   close: string;
+  preview: string;
+  pdfPreviewTitle: string;
   allowCamera: string;
   cameraPermissionTitle: string;
   cameraPermissionMessage: string;

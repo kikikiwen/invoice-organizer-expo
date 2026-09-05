@@ -6,6 +6,7 @@ import { ensurePdfDir, pdfDir } from "../storage/paths";
 import { writeBinaryFile } from "../storage/writeBinaryFile";
 import type { InvoicePdf, InvoicePhoto } from "../types/invoice";
 import { pdfFileName } from "../utils/fileNames";
+import { savePdfMetadata } from "./pdfMetadataService";
 
 function toInvoicePdf(uri: string): InvoicePdf {
   const name = uri.split("/").pop() ?? uri;
@@ -29,5 +30,9 @@ export async function createPdfFromPhotos(
   const pdfBytes = await buildInvoicePdf(ordered);
   const destination = `${pdfDir()}${pdfFileName()}`;
   await writeBinaryFile(destination, pdfBytes);
+  await savePdfMetadata(
+    destination,
+    ordered.map((photo) => photo.id),
+  );
   return destination;
 }

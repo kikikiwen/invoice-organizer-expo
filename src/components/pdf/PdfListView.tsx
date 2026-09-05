@@ -10,16 +10,16 @@ import type { InvoicePdf } from "../../types/invoice";
 
 type PdfListViewProps = {
   pdfs: InvoicePdf[];
-  shareLabel: string;
-  sharingId: string | null;
-  onShare: (uri: string, id: string) => void;
+  openLabel: string;
+  openingId: string | null;
+  onOpen: (id: string) => void;
 };
 
 export function PdfListView({
   pdfs,
-  shareLabel,
-  sharingId,
-  onShare,
+  openLabel,
+  openingId,
+  onOpen,
 }: PdfListViewProps) {
   return (
     <FlatList
@@ -29,14 +29,14 @@ export function PdfListView({
       renderItem={({ item }) => (
         <Pressable
           style={styles.row}
-          onPress={() => onShare(item.uri, item.id)}
-          disabled={sharingId === item.id}
+          onPress={() => onOpen(item.id)}
+          disabled={openingId === item.id}
         >
           <Text style={styles.rowTitle}>{item.name}</Text>
-          {sharingId === item.id ? (
+          {openingId === item.id ? (
             <ActivityIndicator size="small" />
           ) : (
-            <Text style={styles.rowAction}>{shareLabel}</Text>
+            <Text style={styles.rowAction}>{openLabel}</Text>
           )}
         </Pressable>
       )}

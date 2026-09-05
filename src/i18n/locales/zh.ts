@@ -21,6 +21,8 @@ export const zh: Strings = {
   emptyPdfsDescription: "选择发票照片后可生成 PDF",
   share: "分享",
   close: "关闭",
+  preview: "预览",
+  pdfPreviewTitle: "PDF 预览",
   allowCamera: "允许相机",
   cameraPermissionTitle: "需要相机权限",
   cameraPermissionMessage: "用于拍摄并整理您的发票",

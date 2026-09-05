@@ -57,6 +57,7 @@ export default function HomeScreen() {
       <AlbumFooter
         photoLabel={album.strings.photo}
         deleteLabel={album.strings.delete}
+        previewLabel={album.strings.preview}
         doneLabel={album.strings.done(album.selectedCount)}
         generatingLabel={album.strings.generating}
         selectionMode={album.selectionMode}
@@ -65,6 +66,7 @@ export default function HomeScreen() {
         bottomInset={insets.bottom}
         onOpenCamera={album.handleOpenCamera}
         onDeleteSelected={album.handleDeleteSelected}
+        onPreviewPdf={album.handlePreviewPdf}
         onMakePdf={album.handleMakePdf}
       />
 

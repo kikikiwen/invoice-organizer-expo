@@ -22,6 +22,8 @@ export const fr: Strings = {
   emptyPdfsDescription: "Sélectionnez des photos de factures pour générer un PDF",
   share: "Partager",
   close: "Fermer",
+  preview: "Aperçu",
+  pdfPreviewTitle: "Aperçu PDF",
   allowCamera: "Autoriser la caméra",
   cameraPermissionTitle: "Autorisation caméra requise",
   cameraPermissionMessage: "Pour photographier et organiser vos factures",

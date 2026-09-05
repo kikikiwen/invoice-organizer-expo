@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Alert } from "react-native";
+import { useRouter } from "expo-router";
 
 import { useI18n } from "../../i18n";
 import { createPdfFromPhotos } from "../../services/pdfService";
@@ -11,6 +12,7 @@ import { usePhotoViewer } from "../viewer/usePhotoViewer";
 
 export function useAlbumScreen() {
   const strings = useI18n();
+  const router = useRouter();
   const { photos, ready, refresh } = useInvoiceData();
   const selection = usePhotoSelection(photos);
   const viewer = usePhotoViewer(photos);
@@ -49,6 +51,30 @@ export function useAlbumScreen() {
       Alert.alert(
         strings.errorTitle,
         error instanceof Error ? error.message : strings.savePhotoFailed,
+      );
+    } finally {
+      setWorking(false);
+    }
+  };
+
+  const handlePreviewPdf = async () => {
+    if (selection.selectedPhotos.length === 0) {
+      Alert.alert(strings.errorTitle, strings.selectAtLeastOnePhoto);
+      return;
+    }
+
+    setWorking(true);
+    try {
+      const pdfUri = await createPdfFromPhotos(selection.selectedPhotos);
+      await refresh();
+      const pdfId = pdfUri.split("/").pop();
+      if (pdfId) {
+        router.push({ pathname: "/pdf-preview", params: { id: pdfId } });
+      }
+    } catch (error) {
+      Alert.alert(
+        strings.errorTitle,
+        error instanceof Error ? error.message : strings.pdfGenerateFailed,
       );
     } finally {
       setWorking(false);
@@ -123,6 +149,7 @@ export function useAlbumScreen() {
     handleCaptured,
     handleRetake,
     handleUsePhoto,
+    handlePreviewPdf,
     handleMakePdf,
     handleDeleteSelected,
     ...selection,
