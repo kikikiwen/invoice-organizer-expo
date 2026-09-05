@@ -1,0 +1,36 @@
+export type AppLocale = "fr" | "zh";
+
+export type Strings = {
+  appName: string;
+  albumTitle: string;
+  pdfListTitle: string;
+  select: string;
+  cancel: string;
+  confirm: string;
+  delete: string;
+  confirmDeleteTitle: string;
+  confirmDeleteMessage: (count: number) => string;
+  retake: string;
+  usePhoto: string;
+  photo: string;
+  done: (count: number) => string;
+  generating: string;
+  emptyPhotosTitle: string;
+  emptyPhotosDescription: string;
+  emptyPdfsTitle: string;
+  emptyPdfsDescription: string;
+  share: string;
+  close: string;
+  allowCamera: string;
+  cameraPermissionTitle: string;
+  cameraPermissionMessage: string;
+  errorTitle: string;
+  savePhotoFailed: string;
+  selectAtLeastOnePhoto: string;
+  pdfGenerated: string;
+  pdfGenerateFailed: string;
+  shareFailed: string;
+  shareUnavailable: string;
+  pdfCreator: string;
+  filePrefix: string;
+};

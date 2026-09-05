@@ -1,0 +1,9 @@
+{
+  "ios": {
+    "CFBundleDisplayName": "Factures",
+    "NSCameraUsageDescription": "Pour photographier et organiser vos factures"
+  },
+  "android": {
+    "app_name": "Factures"
+  }
+}

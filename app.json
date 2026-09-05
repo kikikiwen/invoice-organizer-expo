@@ -1,0 +1,55 @@
+{
+  "expo": {
+    "name": "Factures",
+    "slug": "invoice-organizer",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "scheme": "invoice-organizer",
+    "userInterfaceStyle": "light",
+    "locales": {
+      "fr": "./locales/fr.json",
+      "zh": "./locales/zh.json"
+    },
+    "ios": {
+      "bundleIdentifier": "com.kikiwen.invoiceorganizer",
+      "supportsTablet": false,
+      "infoPlist": {
+        "CFBundleDevelopmentRegion": "fr",
+        "CFBundleAllowMixedLocalizations": true,
+        "NSCameraUsageDescription": "Pour photographier et organiser vos factures",
+        "UIFileSharingEnabled": true,
+        "LSSupportsOpeningDocumentsInPlace": true
+      }
+    },
+    "android": {
+      "package": "com.kikiwen.invoiceorganizer",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundColor": "#E6F4FE"
+      },
+      "permissions": ["CAMERA"],
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-localization",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Pour photographier et organiser vos factures"
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "cameraPermission": "Pour photographier et organiser vos factures"
+        }
+      ],
+      "expo-sharing"
+    ]
+  }
+}
