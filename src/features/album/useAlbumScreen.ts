@@ -15,7 +15,14 @@ import { usePhotoViewer } from "../viewer/usePhotoViewer";
 export function useAlbumScreen() {
   const strings = useI18n();
   const router = useRouter();
-  const { photos, ready, refresh } = useInvoiceData();
+  const {
+    photos,
+    photosReady,
+    loadError,
+    refreshPhotos,
+    refreshPdfs,
+    retryPhotosLoad,
+  } = useInvoiceData();
   const selection = usePhotoSelection(photos);
   const viewer = usePhotoViewer(photos);
   const [working, setWorking] = useState(false);
@@ -32,7 +39,7 @@ export function useAlbumScreen() {
     }
 
     if (savedCount > 0) {
-      await refresh();
+      await refreshPhotos();
     }
 
     if (savedCount === 0) {
@@ -97,6 +104,10 @@ export function useAlbumScreen() {
   };
 
   const handlePreviewPdf = async () => {
+    if (working) {
+      return;
+    }
+
     if (selection.selectedPhotos.length === 0) {
       Alert.alert(strings.errorTitle, strings.selectAtLeastOnePhoto);
       return;
@@ -105,7 +116,7 @@ export function useAlbumScreen() {
     setWorking(true);
     try {
       const pdfUri = await createPdfFromPhotos(selection.selectedPhotos);
-      await refresh();
+      await refreshPdfs();
       const pdfId = pdfUri.split("/").pop();
       if (pdfId) {
         router.push({ pathname: "/pdf-preview", params: { id: pdfId } });
@@ -118,6 +129,10 @@ export function useAlbumScreen() {
   };
 
   const handleMakePdf = async () => {
+    if (working) {
+      return;
+    }
+
     if (selection.selectedPhotos.length === 0) {
       Alert.alert(strings.errorTitle, strings.selectAtLeastOnePhoto);
       return;
@@ -127,7 +142,7 @@ export function useAlbumScreen() {
     try {
       const pdfUri = await createPdfFromPhotos(selection.selectedPhotos);
       selection.clearSelection();
-      await refresh();
+      await refreshPdfs();
       await sharePdfOrNotifyGenerated(pdfUri, strings);
     } catch {
       Alert.alert(strings.errorTitle, strings.pdfGenerateFailed);
@@ -155,7 +170,7 @@ export function useAlbumScreen() {
             try {
               await deletePhotos(selection.selectedPhotos);
               selection.clearSelection();
-              await refresh();
+              await refreshPhotos();
             } catch {
               Alert.alert(strings.errorTitle, strings.deletePhotoFailed);
             } finally {
@@ -167,11 +182,17 @@ export function useAlbumScreen() {
     );
   };
 
+  const handleRetryLoad = () => {
+    void retryPhotosLoad();
+  };
+
   return {
     strings,
     photos,
-    ready,
+    ready: photosReady,
+    loadError,
     working,
+    handleRetryLoad,
     handleScan,
     handlePickFromGallery,
     handlePreviewPdf,

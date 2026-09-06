@@ -41,6 +41,9 @@ export type Strings = {
   selectAtLeastOnePhoto: string;
   pdfGenerated: string;
   pdfGenerateFailed: string;
+  pdfPreviewFailed: string;
+  loadDataFailed: string;
+  retry: string;
   shareFailed: string;
   shareUnavailable: string;
   pdfCreator: string;

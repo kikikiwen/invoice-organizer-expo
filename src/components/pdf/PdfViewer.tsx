@@ -4,7 +4,9 @@ import * as FileSystem from "expo-file-system/legacy";
 import { WebView } from "react-native-webview";
 
 import { PDF_MAX_BASE64_PREVIEW_BYTES } from "../../constants/media";
+import { useI18n } from "../../i18n";
 import { getFileSize } from "../../storage/getFileSize";
+import { EmptyState } from "../common/EmptyState";
 import { LoadingScreen } from "../common/LoadingScreen";
 import { measureAsync } from "../../utils/perf";
 
@@ -64,28 +66,40 @@ async function loadBase64Source(uri: string): Promise<WebViewSource> {
 }
 
 export function PdfViewer({ uri }: PdfViewerProps) {
+  const strings = useI18n();
   const [source, setSource] = useState<WebViewSource | null>(null);
   const [useBase64Fallback, setUseBase64Fallback] = useState(false);
+  const [failed, setFailed] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
 
     const loadPdf = async () => {
-      if (!useBase64Fallback) {
-        if (!cancelled) {
-          setSource({ uri });
+      try {
+        if (!useBase64Fallback) {
+          if (!cancelled) {
+            setSource({ uri });
+            setFailed(false);
+          }
+          return;
         }
-        return;
-      }
 
-      const nextSource = await measureAsync("pdfViewer.loadBase64", () =>
-        loadBase64Source(uri),
-      );
-      if (!cancelled) {
-        setSource(nextSource);
+        const nextSource = await measureAsync("pdfViewer.loadBase64", () =>
+          loadBase64Source(uri),
+        );
+        if (!cancelled) {
+          setSource(nextSource);
+          setFailed(false);
+        }
+      } catch {
+        if (!cancelled) {
+          setSource(null);
+          setFailed(true);
+        }
       }
     };
 
+    setFailed(false);
     setSource(null);
     void loadPdf();
 
@@ -97,8 +111,23 @@ export function PdfViewer({ uri }: PdfViewerProps) {
   const handleWebViewError = () => {
     if (!useBase64Fallback) {
       setUseBase64Fallback(true);
+      return;
     }
+
+    setSource(null);
+    setFailed(true);
   };
+
+  if (failed) {
+    return (
+      <View style={styles.errorContainer}>
+        <EmptyState
+          title={strings.pdfPreviewFailed}
+          description={strings.emptyPdfsDescription}
+        />
+      </View>
+    );
+  }
 
   if (!source) {
     return <LoadingScreen />;
@@ -127,6 +156,11 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#525659",
+  },
+  errorContainer: {
+    flex: 1,
+    backgroundColor: "#FFFFFF",
+    justifyContent: "center",
   },
   webview: {
     flex: 1,

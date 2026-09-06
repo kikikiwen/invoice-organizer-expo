@@ -15,6 +15,30 @@ import {
 } from "../utils/fileNames";
 import { deletePdfMetadata, savePdfMetadata } from "./pdfMetadataService";
 
+let pdfCreationLock: Promise<void> = Promise.resolve();
+
+function withPdfCreationLock<T>(task: () => Promise<T>): Promise<T> {
+  const run = pdfCreationLock.then(task);
+  pdfCreationLock = run.then(
+    () => undefined,
+    () => undefined,
+  );
+  return run;
+}
+
+async function allocatePdfDestination(): Promise<string> {
+  await ensurePdfDir();
+  let sequence = await nextInvoiceSequence();
+  let destination = `${pdfDir()}${pdfFileName(sequence)}`;
+
+  while (await FileSystem.getInfoAsync(destination).then((info) => info.exists)) {
+    sequence += 1;
+    destination = `${pdfDir()}${pdfFileName(sequence)}`;
+  }
+
+  return destination;
+}
+
 function toInvoicePdf(uri: string): InvoicePdf {
   const name = uri.split("/").pop() ?? uri;
   return { id: name, uri, name: name.replace(/\.pdf$/i, "") };
@@ -61,15 +85,17 @@ export async function createPdfFromPhotos(
     throw new Error(getStrings().selectAtLeastOnePhoto);
   }
 
-  return measureAsync("createPdfFromPhotos", async () => {
-    const ordered = [...selectedPhotos].reverse();
-    const pdfBytes = await buildInvoicePdf(ordered);
-    const destination = `${pdfDir()}${pdfFileName(await nextInvoiceSequence())}`;
-    await writeBinaryFile(destination, pdfBytes);
-    await savePdfMetadata(
-      destination,
-      ordered.map((photo) => photo.id),
-    );
-    return destination;
-  });
+  return measureAsync("createPdfFromPhotos", () =>
+    withPdfCreationLock(async () => {
+      const ordered = [...selectedPhotos].reverse();
+      const pdfBytes = await buildInvoicePdf(ordered);
+      const destination = await allocatePdfDestination();
+      await writeBinaryFile(destination, pdfBytes);
+      await savePdfMetadata(
+        destination,
+        ordered.map((photo) => photo.id),
+      );
+      return destination;
+    }),
+  );
 }

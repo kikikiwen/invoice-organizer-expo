@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { StyleSheet, View } from "react-native";
+import { useEffect } from "react";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -18,32 +18,35 @@ export default function HomeScreen() {
   const insets = useSafeAreaInsets();
   const { locale, toggleLocale } = useLocale();
   const album = useAlbumScreen();
-  const [splashHidden, setSplashHidden] = useState(false);
 
   useEffect(() => {
     if (!album.ready) {
       return;
     }
 
-    let active = true;
-
     void (async () => {
       await waitForMinSplashDuration();
-      if (!active) {
-        return;
-      }
-
       SplashScreen.hide();
-      setSplashHidden(true);
     })();
-
-    return () => {
-      active = false;
-    };
   }, [album.ready]);
 
-  if (!album.ready || !splashHidden) {
+  if (!album.ready) {
     return null;
+  }
+
+  if (album.loadError) {
+    return (
+      <View style={[styles.container, styles.errorContainer]}>
+        <Stack.Screen options={{ headerShown: false }} />
+        <EmptyState
+          title={album.strings.loadDataFailed}
+          description={album.strings.emptyPhotosDescription}
+        />
+        <Pressable style={styles.retryButton} onPress={album.handleRetryLoad}>
+          <Text style={styles.retryButtonText}>{album.strings.retry}</Text>
+        </Pressable>
+      </View>
+    );
   }
 
   return (
@@ -113,5 +116,21 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#FFFFFF",
+  },
+  errorContainer: {
+    justifyContent: "center",
+  },
+  retryButton: {
+    alignSelf: "center",
+    marginTop: 24,
+    backgroundColor: "#2563EB",
+    borderRadius: 12,
+    paddingHorizontal: 24,
+    paddingVertical: 14,
+  },
+  retryButtonText: {
+    color: "#FFFFFF",
+    fontWeight: "700",
+    fontSize: 16,
   },
 });

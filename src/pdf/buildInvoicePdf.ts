@@ -5,11 +5,13 @@ import {
   PAGE_PORTRAIT,
   PDF_PAGE_MARGIN,
 } from "../constants/pdfLayout";
+import { PDF_COMPRESSION_CONCURRENCY } from "../constants/media";
 import { getStrings } from "../i18n/getStrings";
 import { readFileBytes } from "../storage/readFileBytes";
-import { writeBinaryFile } from "../storage/writeBinaryFile";
+import { deleteTempFile } from "../storage/deleteTempFile";
 import type { InvoicePhoto } from "../types/invoice";
 import { compressForPdf } from "../services/pdfImageCompression";
+import { mapWithConcurrency } from "../utils/mapWithConcurrency";
 
 export async function buildInvoicePdf(
   photos: InvoicePhoto[],
@@ -17,9 +19,20 @@ export async function buildInvoicePdf(
   const pdfDoc = await PDFDocument.create();
   pdfDoc.setCreator(getStrings().pdfCreator);
 
-  for (const photo of photos) {
-    const compressedUri = await compressForPdf(photo.uri);
-    const imageBytes = await readFileBytes(compressedUri);
+  const preparedImages = await mapWithConcurrency(
+    photos,
+    PDF_COMPRESSION_CONCURRENCY,
+    async (photo) => {
+      const compressedUri = await compressForPdf(photo.uri);
+      try {
+        return await readFileBytes(compressedUri);
+      } finally {
+        await deleteTempFile(compressedUri);
+      }
+    },
+  );
+
+  for (const imageBytes of preparedImages) {
     const image = await pdfDoc.embedJpg(imageBytes);
     const portrait = image.height >= image.width;
     const pageSize = portrait ? PAGE_PORTRAIT : PAGE_LANDSCAPE;

@@ -2,6 +2,7 @@ import * as FileSystem from "expo-file-system/legacy";
 
 import { PHOTO_EXTENSIONS } from "../constants/media";
 import { listDirectoryFiles } from "../storage/listDirectoryFiles";
+import { deleteTempFile } from "../storage/deleteTempFile";
 import { ensurePhotosDir, photosDir } from "../storage/paths";
 import { measureAsync } from "../utils/perf";
 import type { InvoicePhoto } from "../types/invoice";
@@ -22,9 +23,14 @@ export async function listPhotos(): Promise<InvoicePhoto[]> {
 }
 
 export async function savePhoto(captureUri: string): Promise<void> {
+  await ensurePhotosDir();
   const compressedUri = await compressForSave(captureUri);
   const destination = `${photosDir()}${photoFileName()}`;
-  await FileSystem.copyAsync({ from: compressedUri, to: destination });
+  try {
+    await FileSystem.copyAsync({ from: compressedUri, to: destination });
+  } finally {
+    await deleteTempFile(compressedUri);
+  }
 }
 
 export async function deletePhotos(photos: InvoicePhoto[]): Promise<void> {

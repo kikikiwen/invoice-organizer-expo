@@ -1,4 +1,3 @@
-import { Image } from "react-native";
 import * as ImageManipulator from "expo-image-manipulator";
 import type { Action } from "expo-image-manipulator";
 
@@ -10,34 +9,9 @@ import {
   PDF_QUALITY_MIN,
   PDF_QUALITY_PRECISION,
 } from "../constants/media";
+import { deleteTempFile, deleteTempFiles } from "../storage/deleteTempFile";
 import { getFileSize } from "../storage/getFileSize";
-
-function getImageSize(uri: string): Promise<{ width: number; height: number }> {
-  return new Promise((resolve, reject) => {
-    Image.getSize(
-      uri,
-      (width, height) => resolve({ width, height }),
-      reject,
-    );
-  });
-}
-
-function resizeActions(
-  width: number,
-  height: number,
-  maxLongEdge: number,
-): Action[] {
-  const longEdge = Math.max(width, height);
-  if (longEdge <= maxLongEdge) {
-    return [];
-  }
-
-  if (width >= height) {
-    return [{ resize: { width: maxLongEdge } }];
-  }
-
-  return [{ resize: { height: maxLongEdge } }];
-}
+import { getImageSize, resizeActions } from "../utils/imageResize";
 
 async function encodeJpeg(
   uri: string,
@@ -57,12 +31,14 @@ async function compressToBudget(
   actions: Action[],
 ): Promise<string> {
   let bestUri: string | null = null;
+  const tempUris: string[] = [];
   let low = PDF_QUALITY_MIN;
   let high = PDF_QUALITY_MAX;
 
   while (high - low >= PDF_QUALITY_PRECISION) {
     const quality = (low + high) / 2;
     const encoded = await encodeJpeg(uri, actions, quality);
+    tempUris.push(encoded.uri);
 
     if (encoded.size <= PDF_IMAGE_MAX_BYTES) {
       bestUri = encoded.uri;
@@ -72,12 +48,13 @@ async function compressToBudget(
     }
   }
 
-  if (bestUri) {
-    return bestUri;
+  const resultUri = bestUri ?? (await encodeJpeg(uri, actions, PDF_QUALITY_MIN)).uri;
+  if (!bestUri) {
+    tempUris.push(resultUri);
   }
 
-  const fallback = await encodeJpeg(uri, actions, PDF_QUALITY_MIN);
-  return fallback.uri;
+  await deleteTempFiles(tempUris.filter((tempUri) => tempUri !== resultUri));
+  return resultUri;
 }
 
 /**
@@ -93,6 +70,7 @@ export async function compressForPdf(uri: string): Promise<string> {
     return primary;
   }
 
+  await deleteTempFile(primary);
   const fallbackActions = resizeActions(width, height, PDF_FALLBACK_LONG_EDGE);
   return compressToBudget(uri, fallbackActions);
 }
