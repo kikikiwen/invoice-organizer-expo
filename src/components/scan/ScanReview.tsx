@@ -1,4 +1,13 @@
-import { Image, Modal, Pressable, StyleSheet, Text, View } from "react-native";
+import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  Image,
+  Modal,
+  Platform,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 type ScanReviewProps = {
@@ -10,6 +19,7 @@ type ScanReviewProps = {
   onRetake: () => void;
   onUsePhoto: () => void;
   onDismiss: () => void;
+  onDismissComplete?: () => void;
 };
 
 export function ScanReview({
@@ -21,18 +31,59 @@ export function ScanReview({
   onRetake,
   onUsePhoto,
   onDismiss,
+  onDismissComplete,
 }: ScanReviewProps) {
   const insets = useSafeAreaInsets();
+  const [modalVisible, setModalVisible] = useState(false);
+  const [previewUri, setPreviewUri] = useState<string | null>(null);
+  const dismissHandledRef = useRef(false);
 
-  if (!visible || !uri) {
+  const finishDismiss = useCallback(() => {
+    if (dismissHandledRef.current) {
+      return;
+    }
+
+    dismissHandledRef.current = true;
+    setPreviewUri(null);
+    onDismissComplete?.();
+  }, [onDismissComplete]);
+
+  useEffect(() => {
+    if (visible && uri) {
+      dismissHandledRef.current = false;
+      setPreviewUri(uri);
+      setModalVisible(true);
+      return;
+    }
+
+    if (!visible) {
+      setModalVisible(false);
+    }
+  }, [visible, uri]);
+
+  useEffect(() => {
+    if (modalVisible || !previewUri || Platform.OS === "ios") {
+      return;
+    }
+
+    const timeout = setTimeout(finishDismiss, 350);
+    return () => clearTimeout(timeout);
+  }, [modalVisible, previewUri, finishDismiss]);
+
+  if (!previewUri) {
     return null;
   }
 
   return (
-    <Modal visible animationType="slide" onRequestClose={onDismiss}>
+    <Modal
+      visible={modalVisible}
+      animationType="slide"
+      onRequestClose={onDismiss}
+      onDismiss={finishDismiss}
+    >
       <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom + 12 }]}>
         <View style={styles.previewWrapper}>
-          <Image source={{ uri }} style={styles.preview} resizeMode="contain" />
+          <Image source={{ uri: previewUri }} style={styles.preview} resizeMode="contain" />
         </View>
         <View style={styles.actions}>
           <Pressable

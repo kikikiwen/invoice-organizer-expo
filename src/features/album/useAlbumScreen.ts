@@ -1,9 +1,9 @@
-import { useState } from "react";
-import { Alert } from "react-native";
+import { useRef, useState } from "react";
+import { Alert, InteractionManager } from "react-native";
 import { useRouter } from "expo-router";
 
 import { useI18n } from "../../i18n";
-import { scanInvoiceDocument } from "../../services/documentScannerService";
+import { scanInvoiceDocuments } from "../../services/documentScannerService";
 import { pickPhotosFromGallery } from "../../services/galleryService";
 import { createPdfFromPhotos } from "../../services/pdfService";
 import { deletePhotos, savePhoto } from "../../services/photoService";
@@ -20,6 +20,32 @@ export function useAlbumScreen() {
   const viewer = usePhotoViewer(photos);
   const [pendingScanUri, setPendingScanUri] = useState<string | null>(null);
   const [working, setWorking] = useState(false);
+  const retakeAfterDismissRef = useRef(false);
+
+  const saveScannedPhotos = async (uris: string[]) => {
+    let savedCount = 0;
+    for (const uri of uris) {
+      try {
+        await savePhoto(uri);
+        savedCount += 1;
+      } catch {
+        // Continue saving remaining photos.
+      }
+    }
+
+    if (savedCount > 0) {
+      await refresh();
+    }
+
+    if (savedCount === 0) {
+      Alert.alert(strings.errorTitle, strings.savePhotoFailed);
+    } else if (savedCount < uris.length) {
+      Alert.alert(
+        strings.errorTitle,
+        strings.galleryImportPartial(savedCount, uris.length),
+      );
+    }
+  };
 
   const runDocumentScan = async () => {
     if (working) {
@@ -28,10 +54,17 @@ export function useAlbumScreen() {
 
     setWorking(true);
     try {
-      const uri = await scanInvoiceDocument();
-      if (uri) {
-        setPendingScanUri(uri);
+      const uris = await scanInvoiceDocuments();
+      if (uris.length === 0) {
+        return;
       }
+
+      if (uris.length === 1) {
+        setPendingScanUri(uris[0]);
+        return;
+      }
+
+      await saveScannedPhotos(uris);
     } catch {
       Alert.alert(strings.errorTitle, strings.scanFailed);
     } finally {
@@ -62,28 +95,7 @@ export function useAlbumScreen() {
         return;
       }
 
-      let savedCount = 0;
-      for (const uri of uris) {
-        try {
-          await savePhoto(uri);
-          savedCount += 1;
-        } catch {
-          // Continue importing remaining photos.
-        }
-      }
-
-      if (savedCount > 0) {
-        await refresh();
-      }
-
-      if (savedCount === 0) {
-        Alert.alert(strings.errorTitle, strings.savePhotoFailed);
-      } else if (savedCount < uris.length) {
-        Alert.alert(
-          strings.errorTitle,
-          strings.galleryImportPartial(savedCount, uris.length),
-        );
-      }
+      await saveScannedPhotos(uris);
     } catch {
       Alert.alert(strings.errorTitle, strings.savePhotoFailed);
     } finally {
@@ -95,6 +107,7 @@ export function useAlbumScreen() {
     if (working) {
       return;
     }
+    retakeAfterDismissRef.current = false;
     setPendingScanUri(null);
   };
 
@@ -102,8 +115,19 @@ export function useAlbumScreen() {
     if (working) {
       return;
     }
+    retakeAfterDismissRef.current = true;
     setPendingScanUri(null);
-    void runDocumentScan();
+  };
+
+  const handleScanReviewDismissed = () => {
+    if (!retakeAfterDismissRef.current) {
+      return;
+    }
+
+    retakeAfterDismissRef.current = false;
+    InteractionManager.runAfterInteractions(() => {
+      void runDocumentScan();
+    });
   };
 
   const handleUsePhoto = async () => {
@@ -203,6 +227,7 @@ export function useAlbumScreen() {
     handleScan,
     handlePickFromGallery,
     handleDismissScanReview,
+    handleScanReviewDismissed,
     handleRetake,
     handleUsePhoto,
     handlePreviewPdf,

@@ -84,6 +84,7 @@ export default function HomeScreen() {
         onRetake={album.handleRetake}
         onUsePhoto={album.handleUsePhoto}
         onDismiss={album.handleDismissScanReview}
+        onDismissComplete={album.handleScanReviewDismissed}
       />
 
       <PhotoViewer

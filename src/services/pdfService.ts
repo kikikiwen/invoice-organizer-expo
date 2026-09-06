@@ -8,7 +8,11 @@ import { ensurePdfDir, pdfDir } from "../storage/paths";
 import { writeBinaryFile } from "../storage/writeBinaryFile";
 import { measureAsync } from "../utils/perf";
 import type { InvoicePdf, InvoicePhoto } from "../types/invoice";
-import { pdfFileName } from "../utils/fileNames";
+import {
+  invoiceDate,
+  parseInvoicePdfName,
+  pdfFileName,
+} from "../utils/fileNames";
 import { deletePdfMetadata, savePdfMetadata } from "./pdfMetadataService";
 
 function toInvoicePdf(uri: string): InvoicePdf {
@@ -33,6 +37,23 @@ export async function deletePdfs(pdfs: InvoicePdf[]): Promise<void> {
   );
 }
 
+async function nextInvoiceSequence(): Promise<number> {
+  await ensurePdfDir();
+  const uris = await listDirectoryFiles(pdfDir(), PDF_EXTENSIONS);
+  const today = invoiceDate();
+  let maxSequence = 0;
+
+  for (const uri of uris) {
+    const name = uri.split("/").pop() ?? "";
+    const parsed = parseInvoicePdfName(name);
+    if (parsed?.date === today) {
+      maxSequence = Math.max(maxSequence, parsed.sequence);
+    }
+  }
+
+  return maxSequence + 1;
+}
+
 export async function createPdfFromPhotos(
   selectedPhotos: InvoicePhoto[],
 ): Promise<string> {
@@ -43,7 +64,7 @@ export async function createPdfFromPhotos(
   return measureAsync("createPdfFromPhotos", async () => {
     const ordered = [...selectedPhotos].reverse();
     const pdfBytes = await buildInvoicePdf(ordered);
-    const destination = `${pdfDir()}${pdfFileName()}`;
+    const destination = `${pdfDir()}${pdfFileName(await nextInvoiceSequence())}`;
     await writeBinaryFile(destination, pdfBytes);
     await savePdfMetadata(
       destination,
