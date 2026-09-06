@@ -18,7 +18,7 @@ export function useAlbumScreen() {
   const { photos, ready, refresh } = useInvoiceData();
   const selection = usePhotoSelection(photos);
   const viewer = usePhotoViewer(photos);
-  const [pendingCaptureUri, setPendingCaptureUri] = useState<string | null>(null);
+  const [pendingScanUri, setPendingScanUri] = useState<string | null>(null);
   const [working, setWorking] = useState(false);
 
   const runDocumentScan = async () => {
@@ -30,19 +30,16 @@ export function useAlbumScreen() {
     try {
       const uri = await scanInvoiceDocument();
       if (uri) {
-        setPendingCaptureUri(uri);
+        setPendingScanUri(uri);
       }
-    } catch (error) {
-      Alert.alert(
-        strings.errorTitle,
-        error instanceof Error ? error.message : strings.scanFailed,
-      );
+    } catch {
+      Alert.alert(strings.errorTitle, strings.scanFailed);
     } finally {
       setWorking(false);
     }
   };
 
-  const handleOpenCamera = () => {
+  const handleScan = () => {
     void runDocumentScan();
   };
 
@@ -65,40 +62,62 @@ export function useAlbumScreen() {
         return;
       }
 
+      let savedCount = 0;
       for (const uri of uris) {
-        await savePhoto(uri);
+        try {
+          await savePhoto(uri);
+          savedCount += 1;
+        } catch {
+          // Continue importing remaining photos.
+        }
       }
-      await refresh();
-    } catch (error) {
-      Alert.alert(
-        strings.errorTitle,
-        error instanceof Error ? error.message : strings.savePhotoFailed,
-      );
+
+      if (savedCount > 0) {
+        await refresh();
+      }
+
+      if (savedCount === 0) {
+        Alert.alert(strings.errorTitle, strings.savePhotoFailed);
+      } else if (savedCount < uris.length) {
+        Alert.alert(
+          strings.errorTitle,
+          strings.galleryImportPartial(savedCount, uris.length),
+        );
+      }
+    } catch {
+      Alert.alert(strings.errorTitle, strings.savePhotoFailed);
     } finally {
       setWorking(false);
     }
   };
 
+  const handleDismissScanReview = () => {
+    if (working) {
+      return;
+    }
+    setPendingScanUri(null);
+  };
+
   const handleRetake = () => {
-    setPendingCaptureUri(null);
+    if (working) {
+      return;
+    }
+    setPendingScanUri(null);
     void runDocumentScan();
   };
 
   const handleUsePhoto = async () => {
-    if (!pendingCaptureUri) {
+    if (!pendingScanUri || working) {
       return;
     }
 
     setWorking(true);
     try {
-      await savePhoto(pendingCaptureUri);
-      setPendingCaptureUri(null);
+      await savePhoto(pendingScanUri);
+      setPendingScanUri(null);
       await refresh();
-    } catch (error) {
-      Alert.alert(
-        strings.errorTitle,
-        error instanceof Error ? error.message : strings.savePhotoFailed,
-      );
+    } catch {
+      Alert.alert(strings.errorTitle, strings.savePhotoFailed);
     } finally {
       setWorking(false);
     }
@@ -118,11 +137,8 @@ export function useAlbumScreen() {
       if (pdfId) {
         router.push({ pathname: "/pdf-preview", params: { id: pdfId } });
       }
-    } catch (error) {
-      Alert.alert(
-        strings.errorTitle,
-        error instanceof Error ? error.message : strings.pdfGenerateFailed,
-      );
+    } catch {
+      Alert.alert(strings.errorTitle, strings.pdfGenerateFailed);
     } finally {
       setWorking(false);
     }
@@ -140,11 +156,8 @@ export function useAlbumScreen() {
       selection.clearSelection();
       await refresh();
       await sharePdfOrNotifyGenerated(pdfUri, strings);
-    } catch (error) {
-      Alert.alert(
-        strings.errorTitle,
-        error instanceof Error ? error.message : strings.pdfGenerateFailed,
-      );
+    } catch {
+      Alert.alert(strings.errorTitle, strings.pdfGenerateFailed);
     } finally {
       setWorking(false);
     }
@@ -170,11 +183,8 @@ export function useAlbumScreen() {
               await deletePhotos(selection.selectedPhotos);
               selection.clearSelection();
               await refresh();
-            } catch (error) {
-              Alert.alert(
-                strings.errorTitle,
-                error instanceof Error ? error.message : strings.savePhotoFailed,
-              );
+            } catch {
+              Alert.alert(strings.errorTitle, strings.deletePhotoFailed);
             } finally {
               setWorking(false);
             }
@@ -189,9 +199,10 @@ export function useAlbumScreen() {
     photos,
     ready,
     working,
-    pendingCaptureUri,
-    handleOpenCamera,
+    pendingScanUri,
+    handleScan,
     handlePickFromGallery,
+    handleDismissScanReview,
     handleRetake,
     handleUsePhoto,
     handlePreviewPdf,

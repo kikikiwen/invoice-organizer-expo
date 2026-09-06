@@ -16,5 +16,8 @@ export const PDF_QUALITY_MIN = 0.55;
 export const PDF_QUALITY_MAX = 0.92;
 export const PDF_QUALITY_PRECISION = 0.04;
 
+/** Skip base64 WebView fallback above this size to avoid memory pressure. */
+export const PDF_MAX_BASE64_PREVIEW_BYTES = 12 * 1024 * 1024;
+
 export const PHOTO_EXTENSIONS = new Set(["jpg", "jpeg", "heic", "png"]);
 export const PDF_EXTENSIONS = new Set(["pdf"]);

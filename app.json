@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "Factures",
+    "name": "snapPDF",
     "slug": "invoice-organizer",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -9,6 +9,7 @@
     "userInterfaceStyle": "light",
     "locales": {
       "fr": "./locales/fr.json",
+      "en": "./locales/en.json",
       "zh": "./locales/zh.json"
     },
     "ios": {
@@ -55,6 +56,15 @@
         "react-native-document-scanner-plugin",
         {
           "cameraPermission": "Pour scanner et organiser vos factures"
+        }
+      ],
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#FFFFFF",
+          "image": "./assets/splash.png",
+          "imageWidth": 280,
+          "resizeMode": "contain"
         }
       ]
     ],

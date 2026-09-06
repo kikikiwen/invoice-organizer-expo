@@ -1,4 +1,4 @@
-export type AppLocale = "fr" | "zh";
+export type AppLocale = "fr" | "en" | "zh";
 
 export type Strings = {
   appName: string;
@@ -14,7 +14,7 @@ export type Strings = {
   confirmDeletePdfMessage: (count: number) => string;
   retake: string;
   usePhoto: string;
-  photo: string;
+  scan: string;
   gallery: string;
   done: (count: number) => string;
   generating: string;
@@ -35,6 +35,9 @@ export type Strings = {
   savePhotoFailed: string;
   scanFailed: string;
   deletePdfFailed: string;
+  deletePhotoFailed: string;
+  pdfNotFound: string;
+  galleryImportPartial: (saved: number, total: number) => string;
   selectAtLeastOnePhoto: string;
   pdfGenerated: string;
   pdfGenerateFailed: string;

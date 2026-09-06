@@ -1,7 +1,7 @@
 import type { Strings } from "../types";
 
 export const zh: Strings = {
-  appName: "发票整理",
+  appName: "snapPDF",
   albumTitle: "发票图册",
   history: "历史",
   pdfListTitle: "历史",
@@ -14,7 +14,7 @@ export const zh: Strings = {
   confirmDeletePdfMessage: (count) => `确定删除选中的 ${count} 个 PDF？`,
   retake: "重拍",
   usePhoto: "使用照片",
-  photo: "扫描",
+  scan: "扫描",
   gallery: "相册",
   done: (count) => `生成PDF（${count}）`,
   generating: "生成中…",
@@ -35,11 +35,15 @@ export const zh: Strings = {
   savePhotoFailed: "照片保存失败",
   scanFailed: "扫描失败，请重试",
   deletePdfFailed: "PDF 删除失败",
+  deletePhotoFailed: "照片删除失败",
+  pdfNotFound: "找不到 PDF 文件",
+  galleryImportPartial: (saved, total) =>
+    `已导入 ${saved}/${total} 张照片，部分照片导入失败`,
   selectAtLeastOnePhoto: "请至少选择一张照片",
   pdfGenerated: "PDF 已生成",
   pdfGenerateFailed: "PDF 生成失败",
   shareFailed: "分享失败",
   shareUnavailable: "无法分享",
-  pdfCreator: "发票整理",
+  pdfCreator: "snapPDF",
   filePrefix: "发票",
 };

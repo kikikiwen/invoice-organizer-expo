@@ -6,7 +6,7 @@ import {
   type ReactNode,
 } from "react";
 
-import { getStrings } from "./getStrings";
+import { getNextLocale, getStrings } from "./getStrings";
 import { resolveLocale } from "./resolveLocale";
 import type { AppLocale, Strings } from "./types";
 
@@ -28,7 +28,7 @@ export function I18nProvider({ children }: { children: ReactNode }) {
       strings,
       locale,
       setLocale,
-      toggleLocale: () => setLocale(locale === "fr" ? "zh" : "fr"),
+      toggleLocale: () => setLocale(getNextLocale(locale)),
     };
   }, [locale]);
 

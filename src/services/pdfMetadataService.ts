@@ -4,6 +4,7 @@ import { PDF_COMPRESSION_VERSION } from "../constants/pdfCompression";
 import { buildInvoicePdf } from "../pdf/buildInvoicePdf";
 import { writeBinaryFile } from "../storage/writeBinaryFile";
 import { measureAsync } from "../utils/perf";
+import { pdfFileExists, resolvePdfUriFromId } from "../utils/pdfId";
 import type { InvoicePdf, InvoicePhoto } from "../types/invoice";
 import { listPhotos } from "./photoService";
 
@@ -35,7 +36,12 @@ async function readPdfMetadata(pdfUri: string): Promise<PdfMetadata | null> {
   }
 
   const raw = await FileSystem.readAsStringAsync(metaUri);
-  return JSON.parse(raw) as PdfMetadata;
+  try {
+    return JSON.parse(raw) as PdfMetadata;
+  } catch {
+    await FileSystem.deleteAsync(metaUri, { idempotent: true });
+    return null;
+  }
 }
 
 function resolvePhotosByIds(
@@ -62,6 +68,10 @@ function isCompressionCurrent(metadata: PdfMetadata): boolean {
  */
 export async function ensureCompressedPdf(pdfUri: string): Promise<string> {
   return measureAsync(`ensureCompressedPdf:${pdfUri.split("/").pop()}`, async () => {
+    if (!(await pdfFileExists(pdfUri))) {
+      throw new Error("PDF not found");
+    }
+
     const metadata = await readPdfMetadata(pdfUri);
     if (!metadata || metadata.photoIds.length === 0) {
       return pdfUri;
@@ -87,16 +97,19 @@ export async function ensureCompressedPdf(pdfUri: string): Promise<string> {
   });
 }
 
-export function pdfUriFromId(pdfId: string): string {
-  return `${FileSystem.documentDirectory}pdfs/${pdfId}`;
+export function pdfUriFromId(pdfId: string): string | null {
+  return resolvePdfUriFromId(pdfId);
 }
 
 export function pdfNameFromId(pdfId: string): string {
   return pdfId.replace(/\.pdf$/i, "");
 }
 
-export function toInvoicePdfFromId(pdfId: string): InvoicePdf {
+export function toInvoicePdfFromId(pdfId: string): InvoicePdf | null {
   const uri = pdfUriFromId(pdfId);
+  if (!uri) {
+    return null;
+  }
   return {
     id: pdfId,
     uri,

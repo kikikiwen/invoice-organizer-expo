@@ -1,7 +1,7 @@
 import type { Strings } from "../types";
 
 export const fr: Strings = {
-  appName: "Factures",
+  appName: "snapPDF",
   albumTitle: "Album de factures",
   history: "Historique",
   pdfListTitle: "Historique",
@@ -16,7 +16,7 @@ export const fr: Strings = {
     `Supprimer ${count} PDF sélectionné${count > 1 ? "s" : ""} ?`,
   retake: "Reprendre",
   usePhoto: "Utiliser la photo",
-  photo: "Scan",
+  scan: "Scan",
   gallery: "Galerie",
   done: (count) => `Générer PDF (${count})`,
   generating: "Génération…",
@@ -38,11 +38,15 @@ export const fr: Strings = {
   savePhotoFailed: "Échec de l'enregistrement de la photo",
   scanFailed: "Échec du scan, veuillez réessayer",
   deletePdfFailed: "Échec de la suppression du PDF",
+  deletePhotoFailed: "Échec de la suppression de la photo",
+  pdfNotFound: "PDF introuvable",
+  galleryImportPartial: (saved, total) =>
+    `${saved}/${total} photo${total > 1 ? "s" : ""} importée${saved > 1 ? "s" : ""}, certaines ont échoué`,
   selectAtLeastOnePhoto: "Sélectionnez au moins une photo",
   pdfGenerated: "PDF généré",
   pdfGenerateFailed: "Échec de la génération du PDF",
   shareFailed: "Échec du partage",
   shareUnavailable: "Partage impossible",
-  pdfCreator: "Factures",
+  pdfCreator: "snapPDF",
   filePrefix: "Facture",
 };

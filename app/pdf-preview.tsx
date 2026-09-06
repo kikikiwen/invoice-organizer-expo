@@ -34,7 +34,7 @@ export default function PdfPreviewScreen() {
 
       {!preview.pdfUri ? (
         <EmptyState
-          title={preview.strings.pdfGenerateFailed}
+          title={preview.notFound ? preview.strings.pdfNotFound : preview.strings.pdfGenerateFailed}
           description={preview.strings.emptyPdfsDescription}
         />
       ) : (

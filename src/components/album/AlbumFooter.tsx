@@ -1,7 +1,7 @@
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
 type AlbumFooterProps = {
-  photoLabel: string;
+  scanLabel: string;
   galleryLabel: string;
   deleteLabel: string;
   previewLabel: string;
@@ -11,7 +11,7 @@ type AlbumFooterProps = {
   selectedCount: number;
   working: boolean;
   bottomInset: number;
-  onOpenCamera: () => void;
+  onScan: () => void;
   onPickFromGallery: () => void;
   onDeleteSelected: () => void;
   onPreviewPdf: () => void;
@@ -19,7 +19,7 @@ type AlbumFooterProps = {
 };
 
 export function AlbumFooter({
-  photoLabel,
+  scanLabel,
   galleryLabel,
   deleteLabel,
   previewLabel,
@@ -29,7 +29,7 @@ export function AlbumFooter({
   selectedCount,
   working,
   bottomInset,
-  onOpenCamera,
+  onScan,
   onPickFromGallery,
   onDeleteSelected,
   onPreviewPdf,
@@ -77,11 +77,11 @@ export function AlbumFooter({
       ) : (
         <View style={styles.importActions}>
           <Pressable
-            style={[styles.photoButton, working && styles.buttonDisabled]}
-            onPress={onOpenCamera}
+            style={[styles.scanButton, working && styles.buttonDisabled]}
+            onPress={onScan}
             disabled={working}
           >
-            <Text style={styles.photoButtonText}>{photoLabel}</Text>
+            <Text style={styles.scanButtonText}>{scanLabel}</Text>
           </Pressable>
           <Pressable
             style={[styles.galleryButton, working && styles.buttonDisabled]}
@@ -116,14 +116,14 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: 12,
   },
-  photoButton: {
+  scanButton: {
     flex: 1,
     backgroundColor: "#2563EB",
     borderRadius: 12,
     paddingVertical: 14,
     alignItems: "center",
   },
-  photoButtonText: {
+  scanButtonText: {
     color: "#FFFFFF",
     fontWeight: "700",
     fontSize: 16,

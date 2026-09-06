@@ -17,7 +17,7 @@ export async function sharePdfFile(
     return;
   }
 
-  Alert.alert(strings.shareUnavailable, uri);
+  Alert.alert(strings.shareUnavailable, strings.shareFailed);
 }
 
 export async function sharePdfOrNotifyGenerated(
@@ -29,5 +29,5 @@ export async function sharePdfOrNotifyGenerated(
     return;
   }
 
-  Alert.alert(strings.pdfGenerated, uri);
+  Alert.alert(strings.pdfGenerated, strings.shareUnavailable);
 }

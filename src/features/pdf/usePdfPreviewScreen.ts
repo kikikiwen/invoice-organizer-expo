@@ -3,9 +3,10 @@ import { Alert } from "react-native";
 import { useRouter } from "expo-router";
 
 import { useI18n } from "../../i18n";
-import { pdfUriFromId, ensureCompressedPdf } from "../../services/pdfMetadataService";
+import { ensureCompressedPdf } from "../../services/pdfMetadataService";
 import { getFileSize } from "../../storage/getFileSize";
 import { sharePdfOrNotifyGenerated } from "../../services/shareService";
+import { pdfFileExists, resolvePdfUriFromId } from "../../utils/pdfId";
 
 function formatFileSize(bytes: number): string {
   if (bytes < 1024) {
@@ -23,27 +24,44 @@ export function usePdfPreviewScreen(pdfId: string | undefined) {
   const [pdfUri, setPdfUri] = useState<string | null>(null);
   const [pdfName, setPdfName] = useState("");
   const [fileSizeLabel, setFileSizeLabel] = useState("");
+  const [notFound, setNotFound] = useState(false);
   const [ready, setReady] = useState(false);
   const [sharing, setSharing] = useState(false);
 
   const loadPdf = useCallback(async () => {
     if (!pdfId) {
+      setNotFound(true);
+      setReady(true);
+      return;
+    }
+
+    const uri = resolvePdfUriFromId(pdfId);
+    if (!uri) {
+      setNotFound(true);
       setReady(true);
       return;
     }
 
     try {
-      const uri = pdfUriFromId(pdfId);
+      if (!(await pdfFileExists(uri))) {
+        setNotFound(true);
+        setReady(true);
+        return;
+      }
+
       const compressedUri = await ensureCompressedPdf(uri);
       const size = await getFileSize(compressedUri);
+      if (size === 0) {
+        setNotFound(true);
+        setReady(true);
+        return;
+      }
+
       setPdfUri(compressedUri);
       setPdfName(pdfId.replace(/\.pdf$/i, ""));
       setFileSizeLabel(formatFileSize(size));
-    } catch (error) {
-      Alert.alert(
-        strings.errorTitle,
-        error instanceof Error ? error.message : strings.pdfGenerateFailed,
-      );
+    } catch {
+      Alert.alert(strings.errorTitle, strings.pdfGenerateFailed);
     } finally {
       setReady(true);
     }
@@ -57,11 +75,8 @@ export function usePdfPreviewScreen(pdfId: string | undefined) {
     setSharing(true);
     try {
       await sharePdfOrNotifyGenerated(pdfUri, strings);
-    } catch (error) {
-      Alert.alert(
-        strings.errorTitle,
-        error instanceof Error ? error.message : strings.shareFailed,
-      );
+    } catch {
+      Alert.alert(strings.errorTitle, strings.shareFailed);
     } finally {
       setSharing(false);
     }
@@ -76,6 +91,7 @@ export function usePdfPreviewScreen(pdfId: string | undefined) {
     pdfUri,
     pdfName,
     fileSizeLabel,
+    notFound,
     ready,
     sharing,
     loadPdf,

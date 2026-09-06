@@ -2,6 +2,12 @@ import { Pressable, StyleSheet, Text, View } from "react-native";
 
 import type { AppLocale } from "../../i18n/types";
 
+const LOCALE_LABELS: Record<AppLocale, string> = {
+  fr: "FR",
+  en: "EN",
+  zh: "CH",
+};
+
 type AlbumHeaderProps = {
   title: string;
   topInset: number;
@@ -15,6 +21,8 @@ export function AlbumHeader({
   locale,
   onToggleLanguage,
 }: AlbumHeaderProps) {
+  const locales: AppLocale[] = ["fr", "en", "zh"];
+
   return (
     <View style={[styles.container, { paddingTop: topInset + 8 }]}>
       <View style={styles.row}>
@@ -24,13 +32,16 @@ export function AlbumHeader({
 
         <Pressable style={styles.sideSlot} onPress={onToggleLanguage}>
           <Text style={styles.language}>
-            <Text style={locale === "fr" ? styles.languageActive : undefined}>
-              FR
-            </Text>
-            <Text style={styles.languageSeparator}>/</Text>
-            <Text style={locale === "zh" ? styles.languageActive : undefined}>
-              CH
-            </Text>
+            {locales.map((code, index) => (
+              <Text key={code}>
+                {index > 0 ? (
+                  <Text style={styles.languageSeparator}>/</Text>
+                ) : null}
+                <Text style={locale === code ? styles.languageActive : undefined}>
+                  {LOCALE_LABELS[code]}
+                </Text>
+              </Text>
+            ))}
           </Text>
         </Pressable>
       </View>
@@ -50,7 +61,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   sideSlot: {
-    minWidth: 56,
+    minWidth: 72,
     alignItems: "flex-end",
   },
   title: {
@@ -61,7 +72,7 @@ const styles = StyleSheet.create({
     color: "#111827",
   },
   language: {
-    fontSize: 15,
+    fontSize: 14,
     fontWeight: "600",
     color: "#9CA3AF",
   },

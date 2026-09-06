@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
-import { Platform, StyleSheet, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import * as FileSystem from "expo-file-system/legacy";
 import { WebView } from "react-native-webview";
 
+import { PDF_MAX_BASE64_PREVIEW_BYTES } from "../../constants/media";
+import { getFileSize } from "../../storage/getFileSize";
 import { LoadingScreen } from "../common/LoadingScreen";
 import { measureAsync } from "../../utils/perf";
 
@@ -46,25 +48,30 @@ function buildPdfHtml(base64: string): string {
 }
 
 async function loadBase64Source(uri: string): Promise<WebViewSource> {
+  const size = await getFileSize(uri);
+  if (size > PDF_MAX_BASE64_PREVIEW_BYTES) {
+    throw new Error("PDF too large for inline preview");
+  }
+
   const base64 = await FileSystem.readAsStringAsync(uri, {
     encoding: FileSystem.EncodingType.Base64,
   });
 
   return {
     html: buildPdfHtml(base64),
-    baseUrl: "",
+    baseUrl: "about:blank",
   };
 }
 
 export function PdfViewer({ uri }: PdfViewerProps) {
   const [source, setSource] = useState<WebViewSource | null>(null);
-  const [useFallback, setUseFallback] = useState(false);
+  const [useBase64Fallback, setUseBase64Fallback] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
 
     const loadPdf = async () => {
-      if (Platform.OS === "android" && !useFallback) {
+      if (!useBase64Fallback) {
         if (!cancelled) {
           setSource({ uri });
         }
@@ -85,11 +92,11 @@ export function PdfViewer({ uri }: PdfViewerProps) {
     return () => {
       cancelled = true;
     };
-  }, [uri, useFallback]);
+  }, [uri, useBase64Fallback]);
 
   const handleWebViewError = () => {
-    if (Platform.OS === "android" && !useFallback) {
-      setUseFallback(true);
+    if (!useBase64Fallback) {
+      setUseBase64Fallback(true);
     }
   };
 
@@ -100,12 +107,12 @@ export function PdfViewer({ uri }: PdfViewerProps) {
   return (
     <View style={styles.container}>
       <WebView
-        key={useFallback ? "fallback" : "primary"}
+        key={useBase64Fallback ? "fallback" : "primary"}
         style={styles.webview}
         source={source}
-        originWhitelist={["*"]}
+        originWhitelist={["file://", "about:blank"]}
         allowFileAccess
-        allowUniversalAccessFromFileURLs
+        javaScriptEnabled={false}
         startInLoadingState
         renderLoading={() => <LoadingScreen />}
         scalesPageToFit

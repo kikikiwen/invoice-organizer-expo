@@ -10,5 +10,8 @@ export function resolveLocale(): AppLocale {
   if (languageCode === "fr") {
     return "fr";
   }
-  return "fr";
+  if (languageCode === "en") {
+    return "en";
+  }
+  return "en";
 }

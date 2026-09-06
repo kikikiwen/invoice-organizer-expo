@@ -1,0 +1,10 @@
+{
+  "ios": {
+    "CFBundleDisplayName": "snapPDF",
+    "NSCameraUsageDescription": "To scan and organize your invoices",
+    "NSPhotoLibraryUsageDescription": "To select invoice photos from your gallery"
+  },
+  "android": {
+    "app_name": "snapPDF"
+  }
+}
