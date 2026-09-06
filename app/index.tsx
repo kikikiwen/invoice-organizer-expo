@@ -1,5 +1,7 @@
+import { useEffect, useState } from "react";
 import { StyleSheet, View } from "react-native";
 import { Stack } from "expo-router";
+import * as SplashScreen from "expo-splash-screen";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { AlbumFooter } from "../src/components/album/AlbumFooter";
@@ -7,8 +9,8 @@ import { AlbumHeader } from "../src/components/album/AlbumHeader";
 import { AlbumToolbar } from "../src/components/album/AlbumToolbar";
 import { PhotoGrid } from "../src/components/album/PhotoGrid";
 import { EmptyState } from "../src/components/common/EmptyState";
-import { LoadingScreen } from "../src/components/common/LoadingScreen";
 import { PhotoViewer } from "../src/components/viewer/PhotoViewer";
+import { waitForMinSplashDuration } from "../src/constants/splash";
 import { useAlbumScreen } from "../src/features/album/useAlbumScreen";
 import { useLocale } from "../src/i18n";
 
@@ -16,9 +18,32 @@ export default function HomeScreen() {
   const insets = useSafeAreaInsets();
   const { locale, toggleLocale } = useLocale();
   const album = useAlbumScreen();
+  const [splashHidden, setSplashHidden] = useState(false);
 
-  if (!album.ready) {
-    return <LoadingScreen />;
+  useEffect(() => {
+    if (!album.ready) {
+      return;
+    }
+
+    let active = true;
+
+    void (async () => {
+      await waitForMinSplashDuration();
+      if (!active) {
+        return;
+      }
+
+      SplashScreen.hide();
+      setSplashHidden(true);
+    })();
+
+    return () => {
+      active = false;
+    };
+  }, [album.ready]);
+
+  if (!album.ready || !splashHidden) {
+    return null;
   }
 
   return (

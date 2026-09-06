@@ -3,7 +3,11 @@ import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 
+import { markAppLaunched } from "../src/constants/splash";
 import { I18nProvider } from "../src/i18n";
+
+markAppLaunched();
+SplashScreen.preventAutoHideAsync();
 
 SplashScreen.setOptions({
   duration: 400,
