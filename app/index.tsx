@@ -6,7 +6,6 @@ import { AlbumFooter } from "../src/components/album/AlbumFooter";
 import { AlbumHeader } from "../src/components/album/AlbumHeader";
 import { AlbumToolbar } from "../src/components/album/AlbumToolbar";
 import { PhotoGrid } from "../src/components/album/PhotoGrid";
-import { CameraCaptureModal } from "../src/components/camera/CameraCaptureModal";
 import { PhotoCaptureReview } from "../src/components/camera/PhotoCaptureReview";
 import { EmptyState } from "../src/components/common/EmptyState";
 import { LoadingScreen } from "../src/components/common/LoadingScreen";
@@ -73,12 +72,6 @@ export default function HomeScreen() {
         onDeleteSelected={album.handleDeleteSelected}
         onPreviewPdf={album.handlePreviewPdf}
         onMakePdf={album.handleMakePdf}
-      />
-
-      <CameraCaptureModal
-        visible={album.showCamera}
-        onClose={() => album.setShowCamera(false)}
-        onCapture={album.handleCaptured}
       />
 
       <PhotoCaptureReview

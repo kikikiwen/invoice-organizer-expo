@@ -17,7 +17,7 @@
       "infoPlist": {
         "CFBundleDevelopmentRegion": "fr",
         "CFBundleAllowMixedLocalizations": true,
-        "NSCameraUsageDescription": "Pour photographier et organiser vos factures",
+        "NSCameraUsageDescription": "Pour scanner et organiser vos factures",
         "NSPhotoLibraryUsageDescription": "Pour sélectionner des photos de factures depuis votre galerie",
         "ITSAppUsesNonExemptEncryption": false,
         "UIFileSharingEnabled": true,
@@ -42,12 +42,6 @@
     "plugins": [
       "expo-router",
       "expo-localization",
-      [
-        "expo-camera",
-        {
-          "cameraPermission": "Pour photographier et organiser vos factures"
-        }
-      ],
       "expo-sharing",
       "expo-image",
       [
@@ -55,6 +49,12 @@
         {
           "photosPermission": "Pour sélectionner des photos de factures depuis votre galerie",
           "microphonePermission": false
+        }
+      ],
+      [
+        "react-native-document-scanner-plugin",
+        {
+          "cameraPermission": "Pour scanner et organiser vos factures"
         }
       ]
     ],

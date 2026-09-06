@@ -3,8 +3,9 @@ import { Alert } from "react-native";
 import { useRouter } from "expo-router";
 
 import { useI18n } from "../../i18n";
-import { createPdfFromPhotos } from "../../services/pdfService";
+import { scanInvoiceDocument } from "../../services/documentScannerService";
 import { pickPhotosFromGallery } from "../../services/galleryService";
+import { createPdfFromPhotos } from "../../services/pdfService";
 import { deletePhotos, savePhoto } from "../../services/photoService";
 import { sharePdfOrNotifyGenerated } from "../../services/shareService";
 import { useInvoiceData } from "../invoices/useInvoiceData";
@@ -17,15 +18,32 @@ export function useAlbumScreen() {
   const { photos, ready, refresh } = useInvoiceData();
   const selection = usePhotoSelection(photos);
   const viewer = usePhotoViewer(photos);
-  const [showCamera, setShowCamera] = useState(false);
   const [pendingCaptureUri, setPendingCaptureUri] = useState<string | null>(null);
   const [working, setWorking] = useState(false);
 
-  const handleOpenCamera = () => {
+  const runDocumentScan = async () => {
     if (working) {
       return;
     }
-    setShowCamera(true);
+
+    setWorking(true);
+    try {
+      const uri = await scanInvoiceDocument();
+      if (uri) {
+        setPendingCaptureUri(uri);
+      }
+    } catch (error) {
+      Alert.alert(
+        strings.errorTitle,
+        error instanceof Error ? error.message : strings.scanFailed,
+      );
+    } finally {
+      setWorking(false);
+    }
+  };
+
+  const handleOpenCamera = () => {
+    void runDocumentScan();
   };
 
   const handlePickFromGallery = async () => {
@@ -61,14 +79,9 @@ export function useAlbumScreen() {
     }
   };
 
-  const handleCaptured = (uri: string) => {
-    setShowCamera(false);
-    setPendingCaptureUri(uri);
-  };
-
   const handleRetake = () => {
     setPendingCaptureUri(null);
-    setShowCamera(true);
+    void runDocumentScan();
   };
 
   const handleUsePhoto = async () => {
@@ -176,12 +189,9 @@ export function useAlbumScreen() {
     photos,
     ready,
     working,
-    showCamera,
     pendingCaptureUri,
-    setShowCamera,
     handleOpenCamera,
     handlePickFromGallery,
-    handleCaptured,
     handleRetake,
     handleUsePhoto,
     handlePreviewPdf,

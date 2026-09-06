@@ -33,6 +33,7 @@ export type Strings = {
   galleryPermissionMessage: string;
   errorTitle: string;
   savePhotoFailed: string;
+  scanFailed: string;
   deletePdfFailed: string;
   selectAtLeastOnePhoto: string;
   pdfGenerated: string;

@@ -1,7 +1,7 @@
 {
   "ios": {
     "CFBundleDisplayName": "发票整理",
-    "NSCameraUsageDescription": "用于拍摄并整理您的发票",
+    "NSCameraUsageDescription": "用于扫描并整理您的发票",
     "NSPhotoLibraryUsageDescription": "用于从相册选择发票照片并导入到应用中"
   },
   "android": {

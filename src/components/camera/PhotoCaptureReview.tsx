@@ -27,7 +27,9 @@ export function PhotoCaptureReview({
   return (
     <Modal visible animationType="slide">
       <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom + 12 }]}>
-        <Image source={{ uri }} style={styles.preview} resizeMode="contain" />
+        <View style={styles.previewWrapper}>
+          <Image source={{ uri }} style={styles.preview} resizeMode="contain" />
+        </View>
         <View style={styles.actions}>
           <Pressable style={styles.retakeButton} onPress={onRetake}>
             <Text style={styles.retakeButtonText}>{retakeLabel}</Text>
@@ -45,6 +47,11 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#000000",
+  },
+  previewWrapper: {
+    flex: 1,
+    justifyContent: "center",
+    width: "100%",
   },
   preview: {
     flex: 1,
