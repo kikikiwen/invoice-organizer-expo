@@ -1,5 +1,5 @@
-import { useRef, useState } from "react";
-import { Alert, InteractionManager } from "react-native";
+import { useState } from "react";
+import { Alert } from "react-native";
 import { useRouter } from "expo-router";
 
 import { useI18n } from "../../i18n";
@@ -18,9 +18,7 @@ export function useAlbumScreen() {
   const { photos, ready, refresh } = useInvoiceData();
   const selection = usePhotoSelection(photos);
   const viewer = usePhotoViewer(photos);
-  const [pendingScanUri, setPendingScanUri] = useState<string | null>(null);
   const [working, setWorking] = useState(false);
-  const retakeAfterDismissRef = useRef(false);
 
   const saveScannedPhotos = async (uris: string[]) => {
     let savedCount = 0;
@@ -59,11 +57,6 @@ export function useAlbumScreen() {
         return;
       }
 
-      if (uris.length === 1) {
-        setPendingScanUri(uris[0]);
-        return;
-      }
-
       await saveScannedPhotos(uris);
     } catch {
       Alert.alert(strings.errorTitle, strings.scanFailed);
@@ -96,50 +89,6 @@ export function useAlbumScreen() {
       }
 
       await saveScannedPhotos(uris);
-    } catch {
-      Alert.alert(strings.errorTitle, strings.savePhotoFailed);
-    } finally {
-      setWorking(false);
-    }
-  };
-
-  const handleDismissScanReview = () => {
-    if (working) {
-      return;
-    }
-    retakeAfterDismissRef.current = false;
-    setPendingScanUri(null);
-  };
-
-  const handleRetake = () => {
-    if (working) {
-      return;
-    }
-    retakeAfterDismissRef.current = true;
-    setPendingScanUri(null);
-  };
-
-  const handleScanReviewDismissed = () => {
-    if (!retakeAfterDismissRef.current) {
-      return;
-    }
-
-    retakeAfterDismissRef.current = false;
-    InteractionManager.runAfterInteractions(() => {
-      void runDocumentScan();
-    });
-  };
-
-  const handleUsePhoto = async () => {
-    if (!pendingScanUri || working) {
-      return;
-    }
-
-    setWorking(true);
-    try {
-      await savePhoto(pendingScanUri);
-      setPendingScanUri(null);
-      await refresh();
     } catch {
       Alert.alert(strings.errorTitle, strings.savePhotoFailed);
     } finally {
@@ -223,13 +172,8 @@ export function useAlbumScreen() {
     photos,
     ready,
     working,
-    pendingScanUri,
     handleScan,
     handlePickFromGallery,
-    handleDismissScanReview,
-    handleScanReviewDismissed,
-    handleRetake,
-    handleUsePhoto,
     handlePreviewPdf,
     handleMakePdf,
     handleDeleteSelected,

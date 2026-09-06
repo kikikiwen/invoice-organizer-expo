@@ -6,7 +6,6 @@ import { AlbumFooter } from "../src/components/album/AlbumFooter";
 import { AlbumHeader } from "../src/components/album/AlbumHeader";
 import { AlbumToolbar } from "../src/components/album/AlbumToolbar";
 import { PhotoGrid } from "../src/components/album/PhotoGrid";
-import { ScanReview } from "../src/components/scan/ScanReview";
 import { EmptyState } from "../src/components/common/EmptyState";
 import { LoadingScreen } from "../src/components/common/LoadingScreen";
 import { PhotoViewer } from "../src/components/viewer/PhotoViewer";
@@ -73,18 +72,6 @@ export default function HomeScreen() {
         onDeleteSelected={album.handleDeleteSelected}
         onPreviewPdf={album.handlePreviewPdf}
         onMakePdf={album.handleMakePdf}
-      />
-
-      <ScanReview
-        visible={album.pendingScanUri !== null}
-        uri={album.pendingScanUri}
-        working={album.working}
-        retakeLabel={album.strings.retake}
-        usePhotoLabel={album.strings.usePhoto}
-        onRetake={album.handleRetake}
-        onUsePhoto={album.handleUsePhoto}
-        onDismiss={album.handleDismissScanReview}
-        onDismissComplete={album.handleScanReviewDismissed}
       />
 
       <PhotoViewer
