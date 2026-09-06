@@ -1,5 +1,8 @@
 export const SAVE_JPEG_QUALITY = 0.96;
 
+/** Max photos the user can import from the gallery in one pick. */
+export const GALLERY_IMPORT_LIMIT = 20;
+
 /** Target max file size per photo embedded in PDF (500 KB). */
 export const PDF_IMAGE_MAX_BYTES = 500 * 1024;
 

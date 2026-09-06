@@ -15,6 +15,7 @@ export type Strings = {
   retake: string;
   usePhoto: string;
   photo: string;
+  gallery: string;
   done: (count: number) => string;
   generating: string;
   emptyPhotosTitle: string;
@@ -28,6 +29,8 @@ export type Strings = {
   allowCamera: string;
   cameraPermissionTitle: string;
   cameraPermissionMessage: string;
+  galleryPermissionTitle: string;
+  galleryPermissionMessage: string;
   errorTitle: string;
   savePhotoFailed: string;
   deletePdfFailed: string;

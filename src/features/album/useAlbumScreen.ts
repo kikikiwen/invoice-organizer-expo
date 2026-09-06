@@ -4,6 +4,7 @@ import { useRouter } from "expo-router";
 
 import { useI18n } from "../../i18n";
 import { createPdfFromPhotos } from "../../services/pdfService";
+import { pickPhotosFromGallery } from "../../services/galleryService";
 import { deletePhotos, savePhoto } from "../../services/photoService";
 import { sharePdfOrNotifyGenerated } from "../../services/shareService";
 import { useInvoiceData } from "../invoices/useInvoiceData";
@@ -25,6 +26,39 @@ export function useAlbumScreen() {
       return;
     }
     setShowCamera(true);
+  };
+
+  const handlePickFromGallery = async () => {
+    if (working) {
+      return;
+    }
+
+    setWorking(true);
+    try {
+      const uris = await pickPhotosFromGallery();
+      if (uris === null) {
+        Alert.alert(
+          strings.galleryPermissionTitle,
+          strings.galleryPermissionMessage,
+        );
+        return;
+      }
+      if (uris.length === 0) {
+        return;
+      }
+
+      for (const uri of uris) {
+        await savePhoto(uri);
+      }
+      await refresh();
+    } catch (error) {
+      Alert.alert(
+        strings.errorTitle,
+        error instanceof Error ? error.message : strings.savePhotoFailed,
+      );
+    } finally {
+      setWorking(false);
+    }
   };
 
   const handleCaptured = (uri: string) => {
@@ -146,6 +180,7 @@ export function useAlbumScreen() {
     pendingCaptureUri,
     setShowCamera,
     handleOpenCamera,
+    handlePickFromGallery,
     handleCaptured,
     handleRetake,
     handleUsePhoto,

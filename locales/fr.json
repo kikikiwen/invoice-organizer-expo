@@ -1,7 +1,8 @@
 {
   "ios": {
     "CFBundleDisplayName": "Factures",
-    "NSCameraUsageDescription": "Pour photographier et organiser vos factures"
+    "NSCameraUsageDescription": "Pour photographier et organiser vos factures",
+    "NSPhotoLibraryUsageDescription": "Pour sélectionner des photos de factures depuis votre galerie"
   },
   "android": {
     "app_name": "Factures"

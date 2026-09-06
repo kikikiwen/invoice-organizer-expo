@@ -11,6 +11,7 @@
     "expo-font": "~57.0.3",
     "expo-image": "~57.0.4",
     "expo-image-manipulator": "~57.0.16",
+    "expo-image-picker": "~57.0.16",
     "expo-linking": "~57.0.9",
     "expo-localization": "~57.0.1",
     "expo-router": "~57.0.19",
@@ -33,7 +34,11 @@
     "start": "expo start",
     "android": "expo start --android",
     "ios": "expo start --ios",
-    "web": "expo start --web"
+    "web": "expo start --web",
+    "build:ios:production": "npx eas-cli build --platform ios --profile production",
+    "build:android:production": "npx eas-cli build --platform android --profile production",
+    "submit:ios": "npx eas-cli submit --platform ios --profile production --latest",
+    "submit:android": "npx eas-cli submit --platform android --profile production --latest"
   },
   "private": true
 }

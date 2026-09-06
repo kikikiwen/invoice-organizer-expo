@@ -2,6 +2,7 @@ import { Pressable, StyleSheet, Text, View } from "react-native";
 
 type AlbumFooterProps = {
   photoLabel: string;
+  galleryLabel: string;
   deleteLabel: string;
   previewLabel: string;
   doneLabel: string;
@@ -11,6 +12,7 @@ type AlbumFooterProps = {
   working: boolean;
   bottomInset: number;
   onOpenCamera: () => void;
+  onPickFromGallery: () => void;
   onDeleteSelected: () => void;
   onPreviewPdf: () => void;
   onMakePdf: () => void;
@@ -18,6 +20,7 @@ type AlbumFooterProps = {
 
 export function AlbumFooter({
   photoLabel,
+  galleryLabel,
   deleteLabel,
   previewLabel,
   doneLabel,
@@ -27,6 +30,7 @@ export function AlbumFooter({
   working,
   bottomInset,
   onOpenCamera,
+  onPickFromGallery,
   onDeleteSelected,
   onPreviewPdf,
   onMakePdf,
@@ -71,13 +75,22 @@ export function AlbumFooter({
           </Pressable>
         </View>
       ) : (
-        <Pressable
-          style={[styles.photoButton, working && styles.buttonDisabled]}
-          onPress={onOpenCamera}
-          disabled={working}
-        >
-          <Text style={styles.photoButtonText}>{photoLabel}</Text>
-        </Pressable>
+        <View style={styles.importActions}>
+          <Pressable
+            style={[styles.photoButton, working && styles.buttonDisabled]}
+            onPress={onOpenCamera}
+            disabled={working}
+          >
+            <Text style={styles.photoButtonText}>{photoLabel}</Text>
+          </Pressable>
+          <Pressable
+            style={[styles.galleryButton, working && styles.buttonDisabled]}
+            onPress={onPickFromGallery}
+            disabled={working}
+          >
+            <Text style={styles.galleryButtonText}>{galleryLabel}</Text>
+          </Pressable>
+        </View>
       )}
     </View>
   );
@@ -99,7 +112,12 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: 12,
   },
+  importActions: {
+    flexDirection: "row",
+    gap: 12,
+  },
   photoButton: {
+    flex: 1,
     backgroundColor: "#2563EB",
     borderRadius: 12,
     paddingVertical: 14,
@@ -107,6 +125,20 @@ const styles = StyleSheet.create({
   },
   photoButtonText: {
     color: "#FFFFFF",
+    fontWeight: "700",
+    fontSize: 16,
+  },
+  galleryButton: {
+    flex: 1,
+    backgroundColor: "#FFFFFF",
+    borderRadius: 12,
+    paddingVertical: 14,
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#2563EB",
+  },
+  galleryButtonText: {
+    color: "#2563EB",
     fontWeight: "700",
     fontSize: 16,
   },
