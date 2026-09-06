@@ -63,6 +63,7 @@ export default function HomeScreen() {
         previewLabel={album.strings.preview}
         doneLabel={album.strings.done(album.selectedCount)}
         generatingLabel={album.strings.generating}
+        privacyPolicyLabel={album.strings.privacyPolicy}
         selectionMode={album.selectionMode}
         selectedCount={album.selectedCount}
         working={album.working}

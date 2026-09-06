@@ -49,4 +49,5 @@ export const fr: Strings = {
   shareUnavailable: "Partage impossible",
   pdfCreator: "snapPDF",
   filePrefix: "Facture",
+  privacyPolicy: "Politique de confidentialité",
 };

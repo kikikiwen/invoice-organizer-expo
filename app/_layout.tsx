@@ -19,6 +19,7 @@ export default function RootLayout() {
           <Stack.Screen name="index" options={{ headerShown: false }} />
           <Stack.Screen name="pdfs" options={{ headerShown: true }} />
           <Stack.Screen name="pdf-preview" options={{ headerShown: true }} />
+          <Stack.Screen name="privacy-policy" options={{ headerShown: true }} />
         </Stack>
       </I18nProvider>
     </GestureHandlerRootView>

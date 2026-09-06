@@ -46,4 +46,5 @@ export const zh: Strings = {
   shareUnavailable: "无法分享",
   pdfCreator: "snapPDF",
   filePrefix: "发票",
+  privacyPolicy: "隐私政策",
 };

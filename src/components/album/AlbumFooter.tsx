@@ -1,3 +1,4 @@
+import { Link } from "expo-router";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
 type AlbumFooterProps = {
@@ -7,6 +8,7 @@ type AlbumFooterProps = {
   previewLabel: string;
   doneLabel: string;
   generatingLabel: string;
+  privacyPolicyLabel: string;
   selectionMode: boolean;
   selectedCount: number;
   working: boolean;
@@ -25,6 +27,7 @@ export function AlbumFooter({
   previewLabel,
   doneLabel,
   generatingLabel,
+  privacyPolicyLabel,
   selectionMode,
   selectedCount,
   working,
@@ -75,22 +78,29 @@ export function AlbumFooter({
           </Pressable>
         </View>
       ) : (
-        <View style={styles.importActions}>
-          <Pressable
-            style={[styles.scanButton, working && styles.buttonDisabled]}
-            onPress={onScan}
-            disabled={working}
-          >
-            <Text style={styles.scanButtonText}>{scanLabel}</Text>
-          </Pressable>
-          <Pressable
-            style={[styles.galleryButton, working && styles.buttonDisabled]}
-            onPress={onPickFromGallery}
-            disabled={working}
-          >
-            <Text style={styles.galleryButtonText}>{galleryLabel}</Text>
-          </Pressable>
-        </View>
+        <>
+          <View style={styles.importActions}>
+            <Pressable
+              style={[styles.scanButton, working && styles.buttonDisabled]}
+              onPress={onScan}
+              disabled={working}
+            >
+              <Text style={styles.scanButtonText}>{scanLabel}</Text>
+            </Pressable>
+            <Pressable
+              style={[styles.galleryButton, working && styles.buttonDisabled]}
+              onPress={onPickFromGallery}
+              disabled={working}
+            >
+              <Text style={styles.galleryButtonText}>{galleryLabel}</Text>
+            </Pressable>
+          </View>
+          <Link href="/privacy-policy" asChild>
+            <Pressable style={styles.privacyLink}>
+              <Text style={styles.privacyText}>{privacyPolicyLabel}</Text>
+            </Pressable>
+          </Link>
+        </>
       )}
     </View>
   );
@@ -180,5 +190,14 @@ const styles = StyleSheet.create({
   },
   buttonDisabled: {
     opacity: 0.5,
+  },
+  privacyLink: {
+    marginTop: 10,
+    alignItems: "center",
+  },
+  privacyText: {
+    fontSize: 12,
+    color: "#9CA3AF",
+    textDecorationLine: "underline",
   },
 });

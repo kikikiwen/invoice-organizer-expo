@@ -45,4 +45,5 @@ export type Strings = {
   shareUnavailable: string;
   pdfCreator: string;
   filePrefix: string;
+  privacyPolicy: string;
 };
