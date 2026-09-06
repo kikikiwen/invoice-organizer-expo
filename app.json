@@ -29,7 +29,7 @@
       "package": "com.kikiwen.invoiceorganizer",
       "adaptiveIcon": {
         "foregroundImage": "./assets/android-icon-foreground.png",
-        "backgroundColor": "#E6F4FE"
+        "backgroundColor": "#FFFFFF"
       },
       "permissions": [
         "CAMERA",
