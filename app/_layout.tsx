@@ -4,6 +4,7 @@ import { StatusBar } from "expo-status-bar";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 import { markAppLaunched } from "../src/constants/splash";
+import { EntitlementProvider } from "../src/features/billing/EntitlementProvider";
 import { InvoiceDataProvider } from "../src/features/invoices/useInvoiceData";
 import { I18nProvider } from "../src/i18n";
 
@@ -19,15 +20,17 @@ export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <I18nProvider>
-        <InvoiceDataProvider>
-          <StatusBar style="dark" />
-          <Stack>
-            <Stack.Screen name="index" options={{ headerShown: false }} />
-            <Stack.Screen name="pdfs" options={{ headerShown: true }} />
-            <Stack.Screen name="pdf-preview" options={{ headerShown: true }} />
-            <Stack.Screen name="privacy-policy" options={{ headerShown: true }} />
-          </Stack>
-        </InvoiceDataProvider>
+        <EntitlementProvider>
+          <InvoiceDataProvider>
+            <StatusBar style="dark" />
+            <Stack>
+              <Stack.Screen name="index" options={{ headerShown: false }} />
+              <Stack.Screen name="pdfs" options={{ headerShown: true }} />
+              <Stack.Screen name="pdf-preview" options={{ headerShown: true }} />
+              <Stack.Screen name="privacy-policy" options={{ headerShown: true }} />
+            </Stack>
+          </InvoiceDataProvider>
+        </EntitlementProvider>
       </I18nProvider>
     </GestureHandlerRootView>
   );

@@ -8,6 +8,7 @@ import { pickPhotosFromGallery } from "../../services/galleryService";
 import { createPdfFromPhotos } from "../../services/pdfService";
 import { deletePhotos, savePhoto } from "../../services/photoService";
 import { sharePdfOrNotifyGenerated } from "../../services/shareService";
+import { useEntitlement } from "../billing/EntitlementProvider";
 import { useInvoiceData } from "../invoices/useInvoiceData";
 import { usePhotoSelection } from "../selection/usePhotoSelection";
 import { usePhotoViewer } from "../viewer/usePhotoViewer";
@@ -25,31 +26,44 @@ export function useAlbumScreen() {
   } = useInvoiceData();
   const selection = usePhotoSelection(photos);
   const viewer = usePhotoViewer(photos);
+  const entitlement = useEntitlement();
   const [working, setWorking] = useState(false);
 
   const saveScannedPhotos = async (uris: string[]) => {
-    let savedCount = 0;
-    for (const uri of uris) {
-      try {
-        await savePhoto(uri);
-        savedCount += 1;
-      } catch {
-        // Continue saving remaining photos.
-      }
-    }
+    const { saved, blocked } = await entitlement.saveWithinAllowance(
+      uris,
+      savePhoto,
+    );
 
-    if (savedCount > 0) {
+    if (saved > 0) {
       await refreshPhotos();
     }
 
-    if (savedCount === 0) {
-      Alert.alert(strings.errorTitle, strings.savePhotoFailed);
-    } else if (savedCount < uris.length) {
+    if (saved === 0) {
       Alert.alert(
         strings.errorTitle,
-        strings.galleryImportPartial(savedCount, uris.length),
+        blocked ? strings.quotaBlocked : strings.savePhotoFailed,
+      );
+    } else if (saved < uris.length) {
+      Alert.alert(
+        strings.errorTitle,
+        strings.galleryImportPartial(saved, uris.length),
       );
     }
+  };
+
+  const captureAndSave = async (uris: string[]) => {
+    if (uris.length === 0) {
+      return;
+    }
+
+    const allowed = await entitlement.requestSave(uris.length);
+    if (!allowed) {
+      Alert.alert(strings.errorTitle, strings.quotaBlocked);
+      return;
+    }
+
+    await saveScannedPhotos(uris);
   };
 
   const runDocumentScan = async () => {
@@ -59,12 +73,14 @@ export function useAlbumScreen() {
 
     setWorking(true);
     try {
-      const uris = await scanInvoiceDocuments();
-      if (uris.length === 0) {
+      const canCapture = await entitlement.canStartCapture();
+      if (!canCapture) {
+        entitlement.openPaywall();
         return;
       }
 
-      await saveScannedPhotos(uris);
+      const uris = await scanInvoiceDocuments();
+      await captureAndSave(uris);
     } catch {
       Alert.alert(strings.errorTitle, strings.scanFailed);
     } finally {
@@ -83,6 +99,12 @@ export function useAlbumScreen() {
 
     setWorking(true);
     try {
+      const canCapture = await entitlement.canStartCapture();
+      if (!canCapture) {
+        entitlement.openPaywall();
+        return;
+      }
+
       const uris = await pickPhotosFromGallery();
       if (uris === null) {
         Alert.alert(
@@ -95,7 +117,7 @@ export function useAlbumScreen() {
         return;
       }
 
-      await saveScannedPhotos(uris);
+      await captureAndSave(uris);
     } catch {
       Alert.alert(strings.errorTitle, strings.savePhotoFailed);
     } finally {

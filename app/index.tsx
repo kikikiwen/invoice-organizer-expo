@@ -12,12 +12,22 @@ import { EmptyState } from "../src/components/common/EmptyState";
 import { PhotoViewer } from "../src/components/viewer/PhotoViewer";
 import { waitForMinSplashDuration } from "../src/constants/splash";
 import { useAlbumScreen } from "../src/features/album/useAlbumScreen";
+import { useEntitlement } from "../src/features/billing/EntitlementProvider";
 import { useLocale } from "../src/i18n";
 
 export default function HomeScreen() {
   const insets = useSafeAreaInsets();
   const { locale, toggleLocale } = useLocale();
   const album = useAlbumScreen();
+  const entitlement = useEntitlement();
+  const quotaLabel = entitlement.unlimited
+    ? "∞"
+    : entitlement.credits == null
+      ? null
+      : String(entitlement.credits);
+  const quotaAccessLabel = entitlement.unlimited
+    ? album.strings.quotaUnlimitedAccess
+    : album.strings.quotaRemainingAccess(entitlement.credits ?? 0);
 
   useEffect(() => {
     if (!album.ready) {
@@ -57,6 +67,9 @@ export default function HomeScreen() {
         title={album.strings.albumTitle}
         topInset={insets.top}
         locale={locale}
+        quotaLabel={quotaLabel}
+        quotaAccessLabel={quotaAccessLabel}
+        onOpenPaywall={entitlement.openPaywall}
         onToggleLanguage={toggleLocale}
       />
 

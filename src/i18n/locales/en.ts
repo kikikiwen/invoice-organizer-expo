@@ -52,4 +52,26 @@ export const en: Strings = {
   pdfCreator: "snapPDF",
   filePrefix: "Invoice",
   privacyPolicy: "Privacy Policy",
+  quotaRemainingAccess: (count) =>
+    `${count} save${count === 1 ? "" : "s"} left`,
+  quotaUnlimitedAccess: "Unlimited",
+  paywallTitle: "Save more invoices",
+  paywallRemaining: (count) =>
+    `${count} save${count === 1 ? "" : "s"} left.`,
+  paywallUnlimited: "You can save without a limit.",
+  paywallIntro: "The first 20 photos are free. Then buy a pack, or save without a limit each month.",
+  subscriptionTitle: "Unlimited monthly",
+  subscriptionDetail: "Renews automatically. Cancel in the store.",
+  packTitle: (count) => `${count} photos`,
+  restorePurchases: "Restore purchases",
+  manageSubscription: "Manage subscription",
+  subscriptionTerms:
+    "Payment is charged to your Apple ID or Google account. The subscription renews each month unless you cancel at least 24 hours before the period ends. Invoices already saved stay available to view and export.",
+  purchaseFailed: "The purchase did not finish",
+  purchasesUnavailable: "The store is unavailable",
+  restoreFailed: "Could not restore purchases",
+  restoreEmpty: "No subscription to restore",
+  quotaBlocked: "These photos were not saved. Buy a pack or subscribe, then try again.",
+  priceUnavailable: "Price unavailable",
+  purchasing: "Processing…",
 };

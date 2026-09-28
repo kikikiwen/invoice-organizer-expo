@@ -53,4 +53,28 @@ export const fr: Strings = {
   pdfCreator: "snapPDF",
   filePrefix: "Facture",
   privacyPolicy: "Politique de confidentialité",
+  quotaRemainingAccess: (count) =>
+    `${count} photo${count > 1 ? "s" : ""} restante${count > 1 ? "s" : ""}`,
+  quotaUnlimitedAccess: "Illimité",
+  paywallTitle: "Enregistrer plus de factures",
+  paywallRemaining: (count) =>
+    `${count} photo${count > 1 ? "s" : ""} restante${count > 1 ? "s" : ""}.`,
+  paywallUnlimited: "L'enregistrement est illimité.",
+  paywallIntro:
+    "Les 20 premières photos sont gratuites. Ensuite, achetez un lot ou enregistrez sans limite chaque mois.",
+  subscriptionTitle: "Illimité par mois",
+  subscriptionDetail: "Renouvellement automatique. Annulation dans le magasin.",
+  packTitle: (count) => `${count} photos`,
+  restorePurchases: "Restaurer les achats",
+  manageSubscription: "Gérer l'abonnement",
+  subscriptionTerms:
+    "Le paiement est débité de votre compte Apple ou Google. L'abonnement se renouvelle chaque mois, sauf annulation au moins 24 heures avant la fin de la période. Les factures déjà enregistrées restent consultables et exportables.",
+  purchaseFailed: "L'achat n'a pas abouti",
+  purchasesUnavailable: "Connexion au magasin impossible",
+  restoreFailed: "Échec de la restauration",
+  restoreEmpty: "Aucun abonnement à restaurer",
+  quotaBlocked:
+    "Ces photos n'ont pas été enregistrées. Achetez un lot ou un abonnement, puis réessayez.",
+  priceUnavailable: "Prix indisponible",
+  purchasing: "Traitement…",
 };

@@ -12,6 +12,9 @@ type AlbumHeaderProps = {
   title: string;
   topInset: number;
   locale: AppLocale;
+  quotaLabel: string | null;
+  quotaAccessLabel: string;
+  onOpenPaywall: () => void;
   onToggleLanguage: () => void;
 };
 
@@ -19,6 +22,9 @@ export function AlbumHeader({
   title,
   topInset,
   locale,
+  quotaLabel,
+  quotaAccessLabel,
+  onOpenPaywall,
   onToggleLanguage,
 }: AlbumHeaderProps) {
   const locales: AppLocale[] = ["fr", "en", "zh"];
@@ -26,7 +32,14 @@ export function AlbumHeader({
   return (
     <View style={[styles.container, { paddingTop: topInset + 8 }]}>
       <View style={styles.row}>
-        <View style={styles.sideSlot} />
+        <Pressable
+          style={styles.quotaSlot}
+          onPress={onOpenPaywall}
+          accessibilityRole="button"
+          accessibilityLabel={quotaAccessLabel}
+        >
+          <Text style={styles.quota}>{quotaLabel}</Text>
+        </Pressable>
 
         <Text style={styles.title}>{title}</Text>
 
@@ -59,6 +72,15 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: "row",
     alignItems: "center",
+  },
+  quotaSlot: {
+    minWidth: 72,
+    alignItems: "flex-start",
+  },
+  quota: {
+    fontSize: 15,
+    fontWeight: "700",
+    color: "#2563EB",
   },
   sideSlot: {
     minWidth: 72,
