@@ -9,6 +9,7 @@ export type QuotaSnapshot = {
 
 type QuotaFile = QuotaSnapshot & {
   grantedTransactionIds: string[];
+  revision?: number;
 };
 
 const MAX_TRANSACTION_IDS = 200;
@@ -31,18 +32,19 @@ function freshQuota(): QuotaFile {
   };
 }
 
-function emptyQuota(): QuotaFile {
-  return {
-    credits: 0,
-    subscriptionExpiresAt: null,
-    grantedTransactionIds: [],
-  };
-}
-
 function parseQuota(raw: string): QuotaFile | null {
   try {
     const data = JSON.parse(raw) as Partial<QuotaFile>;
-    if (typeof data.credits !== "number" || !Number.isFinite(data.credits)) {
+    if (
+      !Number.isSafeInteger(data.credits) || (data.credits ?? -1) < 0 ||
+      (data.revision !== undefined &&
+        (!Number.isSafeInteger(data.revision) || data.revision < 0)) ||
+      (data.subscriptionExpiresAt != null &&
+        (typeof data.subscriptionExpiresAt !== "number" || !Number.isFinite(data.subscriptionExpiresAt))) ||
+      (data.grantedTransactionIds !== undefined &&
+        (!Array.isArray(data.grantedTransactionIds) ||
+          !data.grantedTransactionIds.every((id) => typeof id === "string")))
+    ) {
       return null;
     }
 
@@ -51,7 +53,8 @@ function parseQuota(raw: string): QuotaFile | null {
       : [];
 
     return {
-      credits: Math.max(0, Math.floor(data.credits)),
+      credits: data.credits!,
+      revision: data.revision ?? 0,
       subscriptionExpiresAt:
         typeof data.subscriptionExpiresAt === "number"
           ? data.subscriptionExpiresAt
@@ -87,15 +90,35 @@ async function readQuotaFile(): Promise<QuotaFile> {
     return memoryQuota;
   }
 
-  const info = await FileSystem.getInfoAsync(path);
-  if (!info.exists) {
-    const created = freshQuota();
-    await writeQuotaFile(created);
-    return created;
+  const latest = await latestStoredQuota(path);
+  if (latest) {
+    return latest.file;
   }
+  const created = freshQuota();
+  await writeQuotaFile(created);
+  return created;
+}
 
-  const raw = await FileSystem.readAsStringAsync(path);
-  return parseQuota(raw) ?? emptyQuota();
+async function latestStoredQuota(path: string): Promise<{
+  path: string;
+  file: QuotaFile;
+} | null> {
+  let latest: { path: string; file: QuotaFile } | null = null;
+  let found = false;
+  for (const candidate of [path, `${path}.backup`]) {
+    if (!(await FileSystem.getInfoAsync(candidate)).exists) {
+      continue;
+    }
+    found = true;
+    const file = parseQuota(await FileSystem.readAsStringAsync(candidate));
+    if (file && (!latest || (file.revision ?? 0) > (latest.file.revision ?? 0))) {
+      latest = { path: candidate, file };
+    }
+  }
+  if (found && !latest) {
+    throw new Error("Quota ledger is damaged; original files have been preserved");
+  }
+  return latest;
 }
 
 async function writeQuotaFile(file: QuotaFile): Promise<void> {
@@ -105,7 +128,17 @@ async function writeQuotaFile(file: QuotaFile): Promise<void> {
     return;
   }
 
-  await FileSystem.writeAsStringAsync(path, JSON.stringify(file));
+  const latest = await latestStoredQuota(path);
+  // Never overwrite the newest valid snapshot: interrupted writes leave it intact.
+  const destination = latest?.path === path ? `${path}.backup` : path;
+  const raw = JSON.stringify({ ...file, revision: (latest?.file.revision ?? 0) + 1 });
+  if (!parseQuota(raw)) {
+    throw new Error("Invalid quota ledger update");
+  }
+  await FileSystem.writeAsStringAsync(destination, raw);
+  if (await FileSystem.readAsStringAsync(destination) !== raw) {
+    throw new Error("Quota ledger write verification failed");
+  }
 }
 
 function withQuotaLock<T>(task: () => Promise<T>): Promise<T> {

@@ -76,6 +76,7 @@ export function useEntitlement(): EntitlementContextValue {
 }
 
 function useSaveAllowance(storeUnlimited: boolean | null) {
+  const strings = useI18n();
   const [credits, setCredits] = useState<number | null>(null);
   const [cachedUnlimited, setCachedUnlimited] = useState(false);
   const [paywallVisible, setPaywallVisible] = useState(false);
@@ -131,11 +132,15 @@ function useSaveAllowance(storeUnlimited: boolean | null) {
       if (active) {
         apply(snapshot);
       }
+    }).catch(() => {
+      if (active) {
+        Alert.alert(strings.errorTitle, strings.loadDataFailed);
+      }
     });
     return () => {
       active = false;
     };
-  }, [apply]);
+  }, [apply, strings]);
 
   const openPaywall = useCallback(() => {
     setPaywallVisible(true);
@@ -331,7 +336,7 @@ function NativeEntitlementProvider({ children }: { children: ReactNode }) {
       setPurchasing(false);
       void fulfill(purchase)
         .then(() => refreshStore())
-        .catch(() => undefined);
+        .catch(() => Alert.alert(stringsRef.current.errorTitle, stringsRef.current.purchaseFailed));
     },
     onPurchaseError: (error) => {
       setPurchasing(false);

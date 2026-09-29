@@ -1,12 +1,8 @@
 import * as FileSystem from "expo-file-system/legacy";
 
 import { PDF_COMPRESSION_VERSION } from "../constants/pdfCompression";
-import { buildInvoicePdf } from "../pdf/buildInvoicePdf";
-import { writeBinaryFile } from "../storage/writeBinaryFile";
-import { measureAsync } from "../utils/perf";
-import { pdfFileExists, resolvePdfUriFromId } from "../utils/pdfId";
-import type { InvoicePdf, InvoicePhoto } from "../types/invoice";
-import { listPhotos } from "./photoService";
+import { resolvePdfUriFromId } from "../utils/pdfId";
+import type { InvoicePdf } from "../types/invoice";
 
 type PdfMetadata = {
   photoIds: string[];
@@ -28,73 +24,8 @@ export async function savePdfMetadata(
   );
 }
 
-async function readPdfMetadata(pdfUri: string): Promise<PdfMetadata | null> {
-  const metaUri = metadataUriForPdf(pdfUri);
-  const info = await FileSystem.getInfoAsync(metaUri);
-  if (!info.exists) {
-    return null;
-  }
-
-  const raw = await FileSystem.readAsStringAsync(metaUri);
-  try {
-    return JSON.parse(raw) as PdfMetadata;
-  } catch {
-    await FileSystem.deleteAsync(metaUri, { idempotent: true });
-    return null;
-  }
-}
-
-function resolvePhotosByIds(
-  photoIds: string[],
-  allPhotos: InvoicePhoto[],
-): InvoicePhoto[] {
-  const byId = new Map(allPhotos.map((photo) => [photo.id, photo]));
-  return photoIds
-    .map((id) => byId.get(id))
-    .filter((photo): photo is InvoicePhoto => photo !== undefined);
-}
-
 export async function deletePdfMetadata(pdfUri: string): Promise<void> {
   await FileSystem.deleteAsync(metadataUriForPdf(pdfUri), { idempotent: true });
-}
-
-function isCompressionCurrent(metadata: PdfMetadata): boolean {
-  return metadata.compressionVersion === PDF_COMPRESSION_VERSION;
-}
-
-/**
- * Rebuild only when metadata is missing, legacy, or compression settings changed.
- * PDFs created by the app are already compressed and skip this work.
- */
-export async function ensureCompressedPdf(pdfUri: string): Promise<string> {
-  return measureAsync(`ensureCompressedPdf:${pdfUri.split("/").pop()}`, async () => {
-    if (!(await pdfFileExists(pdfUri))) {
-      throw new Error("PDF not found");
-    }
-
-    const metadata = await readPdfMetadata(pdfUri);
-    if (!metadata || metadata.photoIds.length === 0) {
-      return pdfUri;
-    }
-
-    if (isCompressionCurrent(metadata)) {
-      return pdfUri;
-    }
-
-    const sourcePhotos = resolvePhotosByIds(metadata.photoIds, await listPhotos());
-    if (sourcePhotos.length === 0) {
-      return pdfUri;
-    }
-
-    const pdfBytes = await buildInvoicePdf(sourcePhotos);
-    await writeBinaryFile(pdfUri, pdfBytes);
-    await savePdfMetadata(
-      pdfUri,
-      sourcePhotos.map((photo) => photo.id),
-    );
-
-    return pdfUri;
-  });
 }
 
 export function pdfUriFromId(pdfId: string): string | null {

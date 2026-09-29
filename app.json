@@ -21,8 +21,8 @@
         "NSCameraUsageDescription": "Pour scanner et organiser vos factures",
         "NSPhotoLibraryUsageDescription": "Pour sélectionner des photos de factures depuis votre galerie",
         "ITSAppUsesNonExemptEncryption": false,
-        "UIFileSharingEnabled": true,
-        "LSSupportsOpeningDocumentsInPlace": true
+        "UIFileSharingEnabled": false,
+        "LSSupportsOpeningDocumentsInPlace": false
       }
     },
     "android": {
