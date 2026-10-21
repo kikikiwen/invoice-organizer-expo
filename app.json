@@ -1,8 +1,8 @@
 {
   "expo": {
     "name": "snapPDF",
-    "slug": "invoice-organizer",
-    "version": "1.0.0",
+    "slug": "snappdf",
+    "version": "1.1.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "scheme": "invoice-organizer",
@@ -32,8 +32,8 @@
         "backgroundColor": "#FFFFFF"
       },
       "permissions": [
-        "CAMERA",
-        "READ_MEDIA_IMAGES"
+        "android.permission.CAMERA",
+        "android.permission.READ_MEDIA_IMAGES"
       ],
       "predictiveBackGestureEnabled": false
     },
@@ -72,15 +72,15 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "1bd521ea-94f9-457e-98b7-8cb87ad2848b"
+        "projectId": "032eaa54-44e0-4cb6-83aa-02155d05e7c7"
       }
     },
-    "owner": "kikiwen",
+    "owner": "qiwen321s-team",
     "runtimeVersion": {
       "policy": "appVersion"
     },
     "updates": {
-      "url": "https://u.expo.dev/1bd521ea-94f9-457e-98b7-8cb87ad2848b"
+      "url": "https://u.expo.dev/032eaa54-44e0-4cb6-83aa-02155d05e7c7"
     }
   }
 }

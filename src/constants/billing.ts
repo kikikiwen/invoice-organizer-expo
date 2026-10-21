@@ -3,7 +3,7 @@ export const PHOTO_PACK_30_ID = "photos_30";
 export const PHOTO_PACK_100_ID = "photos_100";
 export const UNLIMITED_MONTHLY_ID = "unlimited_monthly";
 
-export const FREE_SAVE_CREDITS = 20;
+export const FREE_SAVE_CREDITS = 50;
 
 export const PACK_CREDITS: Record<string, number> = {
   [PHOTO_PACK_30_ID]: 30,

@@ -61,12 +61,12 @@ export const fr: Strings = {
     `${count} photo${count > 1 ? "s" : ""} restante${count > 1 ? "s" : ""}.`,
   paywallUnlimited: "L'enregistrement est illimité.",
   paywallIntro:
-    "Les 20 premières photos sont gratuites. Ensuite, achetez un lot ou enregistrez sans limite chaque mois.",
+    "Les 50 premières photos sont gratuites. Ensuite, achetez un lot ou enregistrez sans limite chaque mois.",
   subscriptionTitle: "Illimité par mois",
   subscriptionDetail: "Renouvellement automatique. Annulation dans le magasin.",
   packTitle: (count) => `${count} photos`,
-  restorePurchases: "Restaurer les achats",
-  manageSubscription: "Gérer l'abonnement",
+  restorePurchases: "Restaurer l'abonnement",
+  manageSubscription: "Résilier l'abonnement",
   subscriptionTerms:
     "Le paiement est débité de votre compte Apple ou Google. L'abonnement se renouvelle chaque mois, sauf annulation au moins 24 heures avant la fin de la période. Les factures déjà enregistrées restent consultables et exportables.",
   purchaseFailed: "L'achat n'a pas abouti",

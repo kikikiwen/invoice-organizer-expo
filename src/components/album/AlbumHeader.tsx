@@ -32,14 +32,18 @@ export function AlbumHeader({
   return (
     <View style={[styles.container, { paddingTop: topInset + 8 }]}>
       <View style={styles.row}>
-        <Pressable
-          style={styles.quotaSlot}
-          onPress={onOpenPaywall}
-          accessibilityRole="button"
-          accessibilityLabel={quotaAccessLabel}
-        >
-          <Text style={styles.quota}>{quotaLabel}</Text>
-        </Pressable>
+        {quotaLabel == null ? (
+          <View style={styles.quotaSlot} />
+        ) : (
+          <Pressable
+            style={styles.quotaSlot}
+            onPress={onOpenPaywall}
+            accessibilityRole="button"
+            accessibilityLabel={quotaAccessLabel}
+          >
+            <Text style={styles.quota}>{quotaLabel}</Text>
+          </Pressable>
+        )}
 
         <Text style={styles.title}>{title}</Text>
 

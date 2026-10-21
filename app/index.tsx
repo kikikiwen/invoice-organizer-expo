@@ -22,7 +22,7 @@ export default function HomeScreen() {
   const entitlement = useEntitlement();
   const quotaLabel = entitlement.unlimited
     ? "∞"
-    : entitlement.credits == null
+    : entitlement.credits == null || entitlement.credits > 10
       ? null
       : String(entitlement.credits);
   const quotaAccessLabel = entitlement.unlimited

@@ -32,7 +32,7 @@ function boot(files, failure) {
     require: (id) => {
       if (id === 'expo-file-system/legacy') return fileSystem;
       assert.equal(id, '../constants/billing');
-      return { FREE_SAVE_CREDITS: 20 };
+      return { FREE_SAVE_CREDITS: 50 };
     },
   });
   return exports;
@@ -81,7 +81,7 @@ function boot(files, failure) {
   const onlyBackup = new Map([[backup, original]]);
   assert.equal((await boot(onlyBackup).loadQuota()).credits, 70);
   const fresh = new Map();
-  assert.equal((await boot(fresh).loadQuota()).credits, 20);
+  assert.equal((await boot(fresh).loadQuota()).credits, 50);
   await Promise.all(Array.from({ length: 5 }, () => ledger.tryConsumeCredit()));
   assert.equal((await boot(files).loadQuota()).credits, 94);
   console.log('Quota ledger checks passed: migration, interruption/restart, replay, corruption, concurrency.');

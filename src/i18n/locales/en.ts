@@ -59,12 +59,12 @@ export const en: Strings = {
   paywallRemaining: (count) =>
     `${count} save${count === 1 ? "" : "s"} left.`,
   paywallUnlimited: "You can save without a limit.",
-  paywallIntro: "The first 20 photos are free. Then buy a pack, or save without a limit each month.",
+  paywallIntro: "The first 50 photos are free. Then buy a pack, or save without a limit each month.",
   subscriptionTitle: "Unlimited monthly",
   subscriptionDetail: "Renews automatically. Cancel in the store.",
   packTitle: (count) => `${count} photos`,
-  restorePurchases: "Restore purchases",
-  manageSubscription: "Manage subscription",
+  restorePurchases: "Restore subscription",
+  manageSubscription: "Cancel subscription",
   subscriptionTerms:
     "Payment is charged to your Apple ID or Google account. The subscription renews each month unless you cancel at least 24 hours before the period ends. Invoices already saved stay available to view and export.",
   purchaseFailed: "The purchase did not finish",
