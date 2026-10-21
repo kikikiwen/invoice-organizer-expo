@@ -13,7 +13,7 @@ import {
   parseInvoicePdfName,
   pdfFileName,
 } from "../utils/fileNames";
-import { deletePdfMetadata, savePdfMetadata } from "./pdfMetadataService";
+import { deletePdfMetadata } from "./pdfMetadataService";
 
 let pdfCreationLock: Promise<void> = Promise.resolve();
 
@@ -91,10 +91,6 @@ export async function createPdfFromPhotos(
       const pdfBytes = await buildInvoicePdf(ordered);
       const destination = await allocatePdfDestination();
       await writeBinaryFile(destination, pdfBytes);
-      await savePdfMetadata(
-        destination,
-        ordered.map((photo) => photo.id),
-      );
       return destination;
     }),
   );

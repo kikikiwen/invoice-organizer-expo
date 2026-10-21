@@ -73,6 +73,8 @@ export const fr: Strings = {
   purchasesUnavailable: "Connexion au magasin impossible",
   restoreFailed: "Échec de la restauration",
   restoreEmpty: "Aucun abonnement à restaurer",
+  quotaUpdateFailed: (saved) => `${saved} photos enregistrées, mais le quota n’a pas pu être mis à jour. Importation arrêtée. Ne réimportez pas les photos déjà enregistrées.`,
+  savedPhotosRefreshFailed: (saved) => `${saved} photos enregistrées, mais la galerie n’a pas pu être actualisée. Rouvrez l’application pour les voir, sans les réimporter.`,
   quotaBlocked:
     "Ces photos n'ont pas été enregistrées. Achetez un lot ou un abonnement, puis réessayez.",
   priceUnavailable: "Prix indisponible",

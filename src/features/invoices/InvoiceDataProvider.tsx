@@ -19,6 +19,7 @@ type InvoiceDataContextValue = {
   pdfs: InvoicePdf[];
   photosReady: boolean;
   pdfsReady: boolean;
+  pdfsLoadError: boolean;
   loadError: boolean;
   refresh: () => Promise<void>;
   refreshPhotos: () => Promise<void>;
@@ -34,6 +35,7 @@ export function InvoiceDataProvider({ children }: { children: ReactNode }) {
   const [photosReady, setPhotosReady] = useState(false);
   const [pdfsReady, setPdfsReady] = useState(false);
   const [loadError, setLoadError] = useState(false);
+  const [pdfsLoadError, setPdfsLoadError] = useState(false);
 
   const refreshPhotos = useCallback(async () => {
     const nextPhotos = await measureAsync("refreshPhotos", listPhotos);
@@ -41,9 +43,15 @@ export function InvoiceDataProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const refreshPdfs = useCallback(async () => {
-    const nextPdfs = await measureAsync("refreshPdfs", listPdfs);
-    setPdfs(nextPdfs);
-    setPdfsReady(true);
+    setPdfsLoadError(false);
+    try {
+      const nextPdfs = await measureAsync("refreshPdfs", listPdfs);
+      setPdfs(nextPdfs);
+    } catch {
+      setPdfsLoadError(true);
+    } finally {
+      setPdfsReady(true);
+    }
   }, []);
 
   const refresh = useCallback(async () => {
@@ -102,6 +110,7 @@ export function InvoiceDataProvider({ children }: { children: ReactNode }) {
       pdfs,
       photosReady,
       pdfsReady,
+      pdfsLoadError,
       loadError,
       refresh,
       refreshPhotos,
@@ -113,6 +122,7 @@ export function InvoiceDataProvider({ children }: { children: ReactNode }) {
       pdfs,
       photosReady,
       pdfsReady,
+      pdfsLoadError,
       loadError,
       refresh,
       refreshPhotos,

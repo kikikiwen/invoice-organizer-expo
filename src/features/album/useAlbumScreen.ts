@@ -30,16 +30,23 @@ export function useAlbumScreen() {
   const [working, setWorking] = useState(false);
 
   const saveScannedPhotos = async (uris: string[]) => {
-    const { saved, blocked } = await entitlement.saveWithinAllowance(
+    const { saved, blocked, quotaError } = await entitlement.saveWithinAllowance(
       uris,
       savePhoto,
     );
 
     if (saved > 0) {
-      await refreshPhotos();
+      try {
+        await refreshPhotos();
+      } catch {
+        Alert.alert(strings.errorTitle, strings.savedPhotosRefreshFailed(saved));
+        return;
+      }
     }
 
-    if (saved === 0) {
+    if (quotaError) {
+      Alert.alert(strings.errorTitle, strings.quotaUpdateFailed(saved));
+    } else if (saved === 0) {
       Alert.alert(
         strings.errorTitle,
         blocked ? strings.quotaBlocked : strings.savePhotoFailed,

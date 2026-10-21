@@ -1,27 +1,10 @@
 import * as FileSystem from "expo-file-system/legacy";
 
-import { PDF_COMPRESSION_VERSION } from "../constants/pdfCompression";
 import { resolvePdfUriFromId } from "../utils/pdfId";
 import type { InvoicePdf } from "../types/invoice";
 
-type PdfMetadata = {
-  photoIds: string[];
-  compressionVersion?: number;
-};
-
 function metadataUriForPdf(pdfUri: string): string {
   return pdfUri.replace(/\.pdf$/i, ".meta.json");
-}
-
-export async function savePdfMetadata(
-  pdfUri: string,
-  photoIds: string[],
-  compressionVersion = PDF_COMPRESSION_VERSION,
-): Promise<void> {
-  await FileSystem.writeAsStringAsync(
-    metadataUriForPdf(pdfUri),
-    JSON.stringify({ photoIds, compressionVersion } satisfies PdfMetadata),
-  );
 }
 
 export async function deletePdfMetadata(pdfUri: string): Promise<void> {

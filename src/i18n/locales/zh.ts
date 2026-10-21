@@ -68,6 +68,8 @@ export const zh: Strings = {
   restoreFailed: "恢复购买失败",
   restoreEmpty: "没有可恢复的订阅",
   quotaBlocked: "这些照片还没有保存。购买后可以再扫描或导入。",
+  quotaUpdateFailed: (saved) => `已保存 ${saved} 张照片，但无法更新保存额度，已停止本次导入。已保存的照片无需重新导入。`,
+  savedPhotosRefreshFailed: (saved) => `已保存 ${saved} 张照片，但图库刷新失败。请重新打开应用查看，无需重复导入。`,
   priceUnavailable: "价格待同步",
   purchasing: "处理中…",
 };

@@ -72,6 +72,8 @@ export const en: Strings = {
   restoreFailed: "Could not restore purchases",
   restoreEmpty: "No subscription to restore",
   quotaBlocked: "These photos were not saved. Buy a pack or subscribe, then try again.",
+  quotaUpdateFailed: (saved) => `${saved} photos saved, but the save allowance could not be updated. Import stopped. Do not import the saved photos again.`,
+  savedPhotosRefreshFailed: (saved) => `${saved} photos saved, but the gallery could not refresh. Reopen the app to view them; do not import them again.`,
   priceUnavailable: "Price unavailable",
   purchasing: "Processing…",
 };

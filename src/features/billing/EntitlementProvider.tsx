@@ -60,7 +60,7 @@ type EntitlementContextValue = {
   saveWithinAllowance: (
     uris: string[],
     saveOne: (uri: string) => Promise<void>,
-  ) => Promise<{ saved: number; blocked: boolean }>;
+  ) => Promise<{ saved: number; blocked: boolean; quotaError: boolean }>;
 };
 
 type SaveAllowance = ReturnType<typeof useSaveAllowance>;
@@ -82,15 +82,15 @@ function useSaveAllowance(storeUnlimited: boolean | null) {
   const [paywallVisible, setPaywallVisible] = useState(false);
   const pendingRef = useRef<PendingSave | null>(null);
   const storeUnlimitedRef = useRef(storeUnlimited);
-  const cachedUnlimitedRef = useRef(false);
+  const expiryRef = useRef<number | null>(null);
 
   storeUnlimitedRef.current = storeUnlimited;
 
   const currentlyUnlimited = useCallback(() => {
-    if (storeUnlimitedRef.current != null) {
-      return storeUnlimitedRef.current;
-    }
-    return cachedUnlimitedRef.current;
+    return (
+      storeUnlimitedRef.current !== false &&
+      expiryRef.current != null && expiryRef.current > Date.now()
+    );
   }, []);
 
   const acknowledgeStore = useCallback((active: boolean) => {
@@ -98,8 +98,8 @@ function useSaveAllowance(storeUnlimited: boolean | null) {
   }, []);
 
   const apply = useCallback((snapshot: QuotaSnapshot) => {
-    cachedUnlimitedRef.current = isCachedUnlimited(snapshot);
-    setCachedUnlimited(cachedUnlimitedRef.current);
+    expiryRef.current = snapshot.subscriptionExpiresAt;
+    setCachedUnlimited(isCachedUnlimited(snapshot));
     setCredits(snapshot.credits);
   }, []);
 
@@ -181,17 +181,24 @@ function useSaveAllowance(storeUnlimited: boolean | null) {
     async (uris: string[], saveOne: (uri: string) => Promise<void>) => {
       let saved = 0;
       let blocked = false;
+      let quotaError = false;
 
       for (const uri of uris) {
-        if (!currentlyUnlimited()) {
-          const snapshot = await loadQuota();
-          apply(snapshot);
-          if (snapshot.credits <= 0) {
-            blocked = true;
-            break;
+        try {
+          if (!currentlyUnlimited()) {
+            const snapshot = await loadQuota();
+            apply(snapshot);
+            if (snapshot.credits <= 0) {
+              blocked = true;
+              break;
+            }
           }
+        } catch {
+          quotaError = true;
+          break;
         }
 
+        const needsCredit = !currentlyUnlimited();
         try {
           await saveOne(uri);
         } catch {
@@ -199,20 +206,30 @@ function useSaveAllowance(storeUnlimited: boolean | null) {
         }
 
         saved += 1;
-        if (!currentlyUnlimited()) {
-          const consumed = await tryConsumeCredit();
-          apply(consumed.snapshot);
+        if (needsCredit) {
+          try {
+            const consumed = await tryConsumeCredit();
+            apply(consumed.snapshot);
+            if (!consumed.consumed) {
+              quotaError = true;
+              break;
+            }
+          } catch {
+            // Keep the saved photo and stop: a failed write may already have committed.
+            quotaError = true;
+            break;
+          }
         }
       }
 
-      return { saved, blocked };
+      return { saved, blocked, quotaError };
     },
     [apply, currentlyUnlimited],
   );
 
   return {
     credits,
-    unlimited: storeUnlimited ?? cachedUnlimited,
+    unlimited: storeUnlimited !== false && cachedUnlimited && currentlyUnlimited(),
     paywallVisible,
     openPaywall,
     closePaywall,
@@ -243,10 +260,7 @@ function displayPriceFor(
 }
 
 function subscriptionExpiry(subscription: ActiveSubscription): number {
-  if (
-    subscription.expirationDateIOS != null &&
-    subscription.expirationDateIOS > Date.now()
-  ) {
+  if (subscription.expirationDateIOS != null) {
     return subscription.expirationDateIOS;
   }
   return Date.now() + SUBSCRIPTION_OFFLINE_WINDOW_MS;

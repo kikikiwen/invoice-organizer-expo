@@ -36,7 +36,21 @@ export default function PdfListScreen() {
         }}
       />
 
-      {pdfList.pdfs.length === 0 ? (
+      {pdfList.loadError ? (
+        <View>
+          <EmptyState
+            title={pdfList.strings.loadDataFailed}
+            description={pdfList.strings.retry}
+          />
+          <Pressable
+            style={styles.headerButton}
+            onPress={() => void pdfList.retryLoad()}
+            accessibilityRole="button"
+          >
+            <Text style={styles.headerButtonText}>{pdfList.strings.retry}</Text>
+          </Pressable>
+        </View>
+      ) : pdfList.pdfs.length === 0 ? (
         <EmptyState
           title={pdfList.strings.emptyPdfsTitle}
           description={pdfList.strings.emptyPdfsDescription}

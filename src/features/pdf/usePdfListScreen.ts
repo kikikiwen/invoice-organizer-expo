@@ -10,7 +10,7 @@ import { usePdfSelection } from "./usePdfSelection";
 export function usePdfListScreen() {
   const strings = useI18n();
   const router = useRouter();
-  const { pdfs, pdfsReady, refreshPdfs } = useInvoiceData();
+  const { pdfs, pdfsReady, pdfsLoadError, refreshPdfs } = useInvoiceData();
   const selection = usePdfSelection(pdfs);
   const [working, setWorking] = useState(false);
 
@@ -67,6 +67,8 @@ export function usePdfListScreen() {
     strings,
     pdfs,
     ready: pdfsReady,
+    loadError: pdfsLoadError,
+    retryLoad: refreshPdfs,
     working,
     openPdf,
     handleDeleteSelected,

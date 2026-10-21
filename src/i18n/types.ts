@@ -66,6 +66,8 @@ export type Strings = {
   restoreFailed: string;
   restoreEmpty: string;
   quotaBlocked: string;
+  quotaUpdateFailed: (saved: number) => string;
+  savedPhotosRefreshFailed: (saved: number) => string;
   priceUnavailable: string;
   purchasing: string;
 };
