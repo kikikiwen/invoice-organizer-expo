@@ -19,6 +19,7 @@
     "expo-splash-screen": "~57.0.8",
     "expo-status-bar": "~57.0.1",
     "expo-updates": "~57.0.21",
+    "patch-package": "8.0.1",
     "pdf-lib": "^1.17.1",
     "react": "19.2.3",
     "react-native": "0.86.3",
@@ -34,6 +35,10 @@
     "typescript": "~6.0.3"
   },
   "scripts": {
+    "postinstall": "patch-package --error-on-fail && npm run verify:decoder",
+    "eas-build-post-install": "npm run verify:decoder",
+    "verify:decoder": "node scripts/verify-decoder-patch.cjs",
+    "test:decoder": "node tests/decode-uri-security.cjs",
     "start": "expo start",
     "android": "expo run:android",
     "ios": "expo run:ios",
