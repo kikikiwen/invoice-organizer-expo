@@ -4,12 +4,14 @@ import { FREE_SAVE_CREDITS } from "../constants/billing";
 
 export type QuotaSnapshot = {
   credits: number;
-  subscriptionExpiresAt: number | null;
+  lifetimeOwned: boolean;
 };
 
 type QuotaFile = QuotaSnapshot & {
   grantedTransactionIds: string[];
   revision?: number;
+  /** Legacy monthly-subscription cache. Ignored for access. */
+  subscriptionExpiresAt: number | null;
 };
 
 const MAX_TRANSACTION_IDS = 200;
@@ -27,6 +29,7 @@ function quotaPath(): string | null {
 function freshQuota(): QuotaFile {
   return {
     credits: FREE_SAVE_CREDITS,
+    lifetimeOwned: false,
     subscriptionExpiresAt: null,
     grantedTransactionIds: [],
   };
@@ -39,6 +42,7 @@ function parseQuota(raw: string): QuotaFile | null {
       !Number.isSafeInteger(data.credits) || (data.credits ?? -1) < 0 ||
       (data.revision !== undefined &&
         (!Number.isSafeInteger(data.revision) || data.revision < 0)) ||
+      (data.lifetimeOwned !== undefined && typeof data.lifetimeOwned !== "boolean") ||
       (data.subscriptionExpiresAt != null &&
         (typeof data.subscriptionExpiresAt !== "number" || !Number.isFinite(data.subscriptionExpiresAt))) ||
       (data.grantedTransactionIds !== undefined &&
@@ -55,6 +59,7 @@ function parseQuota(raw: string): QuotaFile | null {
     return {
       credits: data.credits!,
       revision: data.revision ?? 0,
+      lifetimeOwned: data.lifetimeOwned === true,
       subscriptionExpiresAt:
         typeof data.subscriptionExpiresAt === "number"
           ? data.subscriptionExpiresAt
@@ -69,18 +74,8 @@ function parseQuota(raw: string): QuotaFile | null {
 function snapshotOf(file: QuotaFile): QuotaSnapshot {
   return {
     credits: file.credits,
-    subscriptionExpiresAt: file.subscriptionExpiresAt,
+    lifetimeOwned: file.lifetimeOwned,
   };
-}
-
-export function isCachedUnlimited(
-  snapshot: QuotaSnapshot,
-  now = Date.now(),
-): boolean {
-  return (
-    snapshot.subscriptionExpiresAt != null &&
-    snapshot.subscriptionExpiresAt > now
-  );
 }
 
 async function readQuotaFile(): Promise<QuotaFile> {
@@ -193,13 +188,3 @@ export function grantPackCredits(
   });
 }
 
-export function setSubscriptionExpiry(
-  subscriptionExpiresAt: number | null,
-): Promise<QuotaSnapshot> {
-  return withQuotaLock(async () => {
-    const file = await readQuotaFile();
-    file.subscriptionExpiresAt = subscriptionExpiresAt;
-    await writeQuotaFile(file);
-    return snapshotOf(file);
-  });
-}

@@ -54,29 +54,21 @@ export const fr: Strings = {
   filePrefix: "Facture",
   privacyPolicy: "Politique de confidentialité",
   quotaRemainingAccess: (count) =>
-    `${count} photo${count > 1 ? "s" : ""} restante${count > 1 ? "s" : ""}`,
-  quotaUnlimitedAccess: "Illimité",
+    `${count.toLocaleString("fr-FR")} photo${count > 1 ? "s" : ""} restante${count > 1 ? "s" : ""}`,
   paywallTitle: "Enregistrer plus de factures",
   paywallRemaining: (count) =>
-    `${count} photo${count > 1 ? "s" : ""} restante${count > 1 ? "s" : ""}.`,
-  paywallUnlimited: "L'enregistrement est illimité.",
+    `${count.toLocaleString("fr-FR")} photo${count > 1 ? "s" : ""} restante${count > 1 ? "s" : ""}.`,
   paywallIntro:
-    "Les 50 premières photos sont gratuites. Ensuite, achetez un lot ou enregistrez sans limite chaque mois.",
-  subscriptionTitle: "Illimité par mois",
-  subscriptionDetail: "Renouvellement automatique. Annulation dans le magasin.",
-  packTitle: (count) => `${count} photos`,
-  restorePurchases: "Restaurer l'abonnement",
-  manageSubscription: "Résilier l'abonnement",
-  subscriptionTerms:
-    "Le paiement est débité de votre compte Apple ou Google. L'abonnement se renouvelle chaque mois, sauf annulation au moins 24 heures avant la fin de la période. Les factures déjà enregistrées restent consultables et exportables.",
+    "Les 20 premières photos sont gratuites. Ensuite, vous pouvez acheter 30 ou 100000000 photos.",
+  packTitle: (count) => `${count.toLocaleString("fr-FR")} photos`,
+  purchaseTerms:
+    "Le paiement est débité de votre compte Apple ou Google. Les photos achetées s'ajoutent au solde, et chaque enregistrement en retire une.",
   purchaseFailed: "L'achat n'a pas abouti",
   purchasesUnavailable: "Connexion au magasin impossible",
-  restoreFailed: "Échec de la restauration",
-  restoreEmpty: "Aucun abonnement à restaurer",
   quotaUpdateFailed: (saved) => `${saved} photos enregistrées, mais le quota n’a pas pu être mis à jour. Importation arrêtée. Ne réimportez pas les photos déjà enregistrées.`,
   savedPhotosRefreshFailed: (saved) => `${saved} photos enregistrées, mais la galerie n’a pas pu être actualisée. Rouvrez l’application pour les voir, sans les réimporter.`,
   quotaBlocked:
-    "Ces photos n'ont pas été enregistrées. Achetez un lot ou un abonnement, puis réessayez.",
+    "Ces photos n'ont pas été enregistrées. Achetez des photos, puis réessayez.",
   priceUnavailable: "Prix indisponible",
   purchasing: "Traitement…",
 };

@@ -66,6 +66,34 @@ h3 {
   border-color: #2563eb;
 }
 
+.lang-switch {
+  display: flex;
+  gap: 8px;
+  margin: 0 0 1.5rem;
+}
+
+.lang-switch button {
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  padding: 0.45rem 0.8rem;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  color: #64748b;
+  cursor: pointer;
+}
+
+.lang-switch button[aria-pressed="true"] {
+  border-color: #2563eb;
+  color: #2563eb;
+  background: #eff6ff;
+}
+
+.policy[hidden] {
+  display: none;
+}
+
 .back-link {
   display: inline-block;
   margin-bottom: 1.5rem;

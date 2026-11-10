@@ -15,26 +15,20 @@ type PaywallOffer = {
 type PaywallSheetProps = {
   visible: boolean;
   credits: number | null;
-  unlimited: boolean;
   offers: PaywallOffer[];
   purchasing: boolean;
   storeAvailable: boolean;
   onBuy: (productId: string) => void;
-  onRestore: () => void;
-  onManage: () => void;
   onClose: () => void;
 };
 
 export function PaywallSheet({
   visible,
   credits,
-  unlimited,
   offers,
   purchasing,
   storeAvailable,
   onBuy,
-  onRestore,
-  onManage,
   onClose,
 }: PaywallSheetProps) {
   const strings = useI18n();
@@ -54,13 +48,11 @@ export function PaywallSheet({
         >
           <Text style={styles.title}>{strings.paywallTitle}</Text>
           <Text style={styles.status}>
-            {unlimited
-              ? strings.paywallUnlimited
-              : credits == null
-                ? strings.paywallIntro
-                : strings.paywallRemaining(credits)}
+            {credits == null
+              ? strings.paywallIntro
+              : strings.paywallRemaining(credits)}
           </Text>
-          {unlimited || credits == null ? null : (
+          {credits == null ? null : (
             <Text style={styles.intro}>{strings.paywallIntro}</Text>
           )}
 
@@ -111,20 +103,11 @@ export function PaywallSheet({
             <Text style={styles.purchasing}>{strings.purchasing}</Text>
           ) : null}
 
-          {storeAvailable ? (
-            <View style={styles.links}>
-              <Pressable onPress={onRestore} disabled={purchasing}>
-                <Text style={styles.link}>{strings.restorePurchases}</Text>
-              </Pressable>
-              <Pressable onPress={onManage} disabled={purchasing}>
-                <Text style={styles.link}>{strings.manageSubscription}</Text>
-              </Pressable>
-            </View>
-          ) : (
+          {storeAvailable ? null : (
             <Text style={styles.unavailable}>{strings.purchasesUnavailable}</Text>
           )}
 
-          <Text style={styles.terms}>{strings.subscriptionTerms}</Text>
+          <Text style={styles.terms}>{strings.purchaseTerms}</Text>
           <Pressable onPress={onClose} style={styles.close}>
             <Text style={styles.closeText}>{strings.close}</Text>
           </Pressable>
@@ -229,16 +212,6 @@ const styles = StyleSheet.create({
     marginTop: 12,
     color: "#6B7280",
     fontSize: 14,
-  },
-  links: {
-    marginTop: 16,
-    flexDirection: "row",
-    justifyContent: "space-between",
-  },
-  link: {
-    color: "#2563EB",
-    fontSize: 14,
-    fontWeight: "600",
   },
   unavailable: {
     marginTop: 16,

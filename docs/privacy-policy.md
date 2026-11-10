@@ -119,6 +119,7 @@
 如对本隐私政策或数据处理有任何疑问，请通过以下方式联系我们：
 
 - **开发者：** kikiwen
+- **邮箱：** [xqiwen@outlook.com](mailto:xqiwen@outlook.com)
 - **GitHub：** [提交 Issue](https://github.com/kikikiwen/invoice-organizer-expo/issues)
 - **应用包名：** com.kikiwen.invoiceorganizer
 

@@ -11,37 +11,27 @@ import {
 import { Alert, AppState, Platform } from "react-native";
 import {
   ErrorCode,
-  deepLinkToSubscriptions,
   finishTransaction,
-  getActiveSubscriptions,
   getAvailablePurchases,
   isUserCancelledError,
   useIAP,
-  type ActiveSubscription,
-  type ProductSubscription,
   type Purchase,
 } from "expo-iap";
 
 import { PaywallSheet } from "../../components/billing/PaywallSheet";
 import {
-  ANDROID_PACKAGE,
-  PHOTO_PACK_100_ID,
   PHOTO_PACK_30_ID,
-  SUBSCRIPTION_OFFLINE_WINDOW_MS,
-  UNLIMITED_MONTHLY_ID,
+  PHOTO_PACK_LARGE_ID,
 } from "../../constants/billing";
 import { useI18n, type Strings } from "../../i18n";
 import {
   isReadyPurchase,
-  isUnlimitedProduct,
   packCreditAmount,
   purchaseTransactionId,
 } from "../../services/purchaseFulfillment";
 import {
   grantPackCredits,
-  isCachedUnlimited,
   loadQuota,
-  setSubscriptionExpiry,
   tryConsumeCredit,
   type QuotaSnapshot,
 } from "../../storage/quotaLedger";
@@ -53,7 +43,6 @@ type PendingSave = {
 
 type EntitlementContextValue = {
   credits: number | null;
-  unlimited: boolean;
   openPaywall: () => void;
   canStartCapture: () => Promise<boolean>;
   requestSave: (count: number) => Promise<boolean>;
@@ -75,48 +64,27 @@ export function useEntitlement(): EntitlementContextValue {
   return context;
 }
 
-function useSaveAllowance(storeUnlimited: boolean | null) {
+function useSaveAllowance() {
   const strings = useI18n();
   const [credits, setCredits] = useState<number | null>(null);
-  const [cachedUnlimited, setCachedUnlimited] = useState(false);
   const [paywallVisible, setPaywallVisible] = useState(false);
   const pendingRef = useRef<PendingSave | null>(null);
-  const storeUnlimitedRef = useRef(storeUnlimited);
-  const expiryRef = useRef<number | null>(null);
-
-  storeUnlimitedRef.current = storeUnlimited;
-
-  const currentlyUnlimited = useCallback(() => {
-    return (
-      storeUnlimitedRef.current !== false &&
-      expiryRef.current != null && expiryRef.current > Date.now()
-    );
-  }, []);
-
-  const acknowledgeStore = useCallback((active: boolean) => {
-    storeUnlimitedRef.current = active;
-  }, []);
 
   const apply = useCallback((snapshot: QuotaSnapshot) => {
-    expiryRef.current = snapshot.subscriptionExpiresAt;
-    setCachedUnlimited(isCachedUnlimited(snapshot));
     setCredits(snapshot.credits);
   }, []);
 
-  const settlePending = useCallback(
-    (nextCredits: number) => {
-      const pending = pendingRef.current;
-      if (!pending) {
-        return;
-      }
-      if (currentlyUnlimited() || nextCredits >= pending.count) {
-        pending.resolve(true);
-        pendingRef.current = null;
-        setPaywallVisible(false);
-      }
-    },
-    [currentlyUnlimited],
-  );
+  const settlePending = useCallback((nextCredits: number) => {
+    const pending = pendingRef.current;
+    if (!pending) {
+      return;
+    }
+    if (nextCredits >= pending.count) {
+      pending.resolve(true);
+      pendingRef.current = null;
+      setPaywallVisible(false);
+    }
+  }, []);
 
   const applyAndSettle = useCallback(
     (snapshot: QuotaSnapshot) => {
@@ -158,14 +126,14 @@ function useSaveAllowance(storeUnlimited: boolean | null) {
   const canStartCapture = useCallback(async () => {
     const snapshot = await loadQuota();
     apply(snapshot);
-    return currentlyUnlimited() || snapshot.credits > 0;
-  }, [apply, currentlyUnlimited]);
+    return snapshot.credits > 0;
+  }, [apply]);
 
   const requestSave = useCallback(
     async (count: number) => {
       const snapshot = await loadQuota();
       apply(snapshot);
-      if (currentlyUnlimited() || snapshot.credits >= count) {
+      if (snapshot.credits >= count) {
         return true;
       }
 
@@ -174,7 +142,7 @@ function useSaveAllowance(storeUnlimited: boolean | null) {
         setPaywallVisible(true);
       });
     },
-    [apply, currentlyUnlimited],
+    [apply],
   );
 
   const saveWithinAllowance = useCallback(
@@ -185,20 +153,17 @@ function useSaveAllowance(storeUnlimited: boolean | null) {
 
       for (const uri of uris) {
         try {
-          if (!currentlyUnlimited()) {
-            const snapshot = await loadQuota();
-            apply(snapshot);
-            if (snapshot.credits <= 0) {
-              blocked = true;
-              break;
-            }
+          const snapshot = await loadQuota();
+          apply(snapshot);
+          if (snapshot.credits <= 0) {
+            blocked = true;
+            break;
           }
         } catch {
           quotaError = true;
           break;
         }
 
-        const needsCredit = !currentlyUnlimited();
         try {
           await saveOne(uri);
         } catch {
@@ -206,30 +171,27 @@ function useSaveAllowance(storeUnlimited: boolean | null) {
         }
 
         saved += 1;
-        if (needsCredit) {
-          try {
-            const consumed = await tryConsumeCredit();
-            apply(consumed.snapshot);
-            if (!consumed.consumed) {
-              quotaError = true;
-              break;
-            }
-          } catch {
-            // Keep the saved photo and stop: a failed write may already have committed.
+        try {
+          const consumed = await tryConsumeCredit();
+          apply(consumed.snapshot);
+          if (!consumed.consumed) {
             quotaError = true;
             break;
           }
+        } catch {
+          // Keep the saved photo and stop: a failed write may already have committed.
+          quotaError = true;
+          break;
         }
       }
 
       return { saved, blocked, quotaError };
     },
-    [apply, currentlyUnlimited],
+    [apply],
   );
 
   return {
     credits,
-    unlimited: storeUnlimited !== false && cachedUnlimited && currentlyUnlimited(),
     paywallVisible,
     openPaywall,
     closePaywall,
@@ -237,19 +199,7 @@ function useSaveAllowance(storeUnlimited: boolean | null) {
     requestSave,
     saveWithinAllowance,
     applyAndSettle,
-    acknowledgeStore,
   };
-}
-
-function offerTokenFor(
-  subscription: ProductSubscription | undefined,
-): string | null {
-  for (const offer of subscription?.subscriptionOffers ?? []) {
-    if (offer.offerTokenAndroid) {
-      return offer.offerTokenAndroid;
-    }
-  }
-  return null;
 }
 
 function displayPriceFor(
@@ -259,34 +209,17 @@ function displayPriceFor(
   return items.find((item) => item.id === id)?.displayPrice ?? null;
 }
 
-function subscriptionExpiry(subscription: ActiveSubscription): number {
-  if (subscription.expirationDateIOS != null) {
-    return subscription.expirationDateIOS;
-  }
-  return Date.now() + SUBSCRIPTION_OFFLINE_WINDOW_MS;
-}
-
 function NativeEntitlementProvider({ children }: { children: ReactNode }) {
   const strings = useI18n();
   const stringsRef = useRef(strings);
   stringsRef.current = strings;
-  const [storeUnlimited, setStoreUnlimited] = useState<boolean | null>(null);
   const [purchasing, setPurchasing] = useState(false);
-  const allowance = useSaveAllowance(storeUnlimited);
+  const allowance = useSaveAllowance();
   const allowanceRef = useRef(allowance);
   allowanceRef.current = allowance;
 
   const fulfill = useCallback(async (purchase: Purchase) => {
     if (!isReadyPurchase(purchase)) {
-      return 0;
-    }
-
-    if (isUnlimitedProduct(purchase.productId)) {
-      try {
-        await finishTransaction({ purchase, isConsumable: false });
-      } catch {
-        // An already finished subscription can show up again on the next query.
-      }
       return 0;
     }
 
@@ -314,37 +247,14 @@ function NativeEntitlementProvider({ children }: { children: ReactNode }) {
     for (const purchase of purchases) {
       granted += await fulfill(purchase);
     }
-
-    const active = await getActiveSubscriptions([UNLIMITED_MONTHLY_ID]);
-    const current = active.find(
-      (item) =>
-        item.isActive &&
-        (item.productId === UNLIMITED_MONTHLY_ID ||
-          item.currentPlanId === UNLIMITED_MONTHLY_ID),
-    );
-
-    if (current) {
-      const snapshot = await setSubscriptionExpiry(subscriptionExpiry(current));
-      allowanceRef.current.acknowledgeStore(true);
-      setStoreUnlimited(true);
-      allowanceRef.current.applyAndSettle(snapshot);
-      return { unlimited: true, granted };
-    }
-
-    const snapshot = await setSubscriptionExpiry(null);
-    allowanceRef.current.acknowledgeStore(false);
-    setStoreUnlimited(false);
-    allowanceRef.current.applyAndSettle(snapshot);
-    return { unlimited: false, granted };
+    return { granted };
   }, [fulfill]);
 
   const {
     connected,
     products,
-    subscriptions,
     fetchProducts,
     requestPurchase,
-    restorePurchases,
   } = useIAP({
     onPurchaseSuccess: (purchase) => {
       setPurchasing(false);
@@ -377,8 +287,8 @@ function NativeEntitlementProvider({ children }: { children: ReactNode }) {
     void (async () => {
       try {
         await fetchProducts({
-          skus: [PHOTO_PACK_30_ID, PHOTO_PACK_100_ID, UNLIMITED_MONTHLY_ID],
-          type: "all",
+          skus: [PHOTO_PACK_30_ID, PHOTO_PACK_LARGE_ID],
+          type: "in-app",
         });
         if (!cancelled) {
           await refreshStore();
@@ -402,17 +312,9 @@ function NativeEntitlementProvider({ children }: { children: ReactNode }) {
     return () => subscription.remove();
   }, [connected, refreshStore]);
 
-  const subscription = subscriptions.find(
-    (item) => item.id === UNLIMITED_MONTHLY_ID,
-  );
-  const offerToken = offerTokenFor(subscription);
-  const subscriptionPrice = subscription?.displayPrice ?? null;
+  const largePackPrice = displayPriceFor(products, PHOTO_PACK_LARGE_ID);
   const pack30Price = displayPriceFor(products, PHOTO_PACK_30_ID);
-  const pack100Price = displayPriceFor(products, PHOTO_PACK_100_ID);
-  const subscribeDisabled =
-    !connected ||
-    subscriptionPrice == null ||
-    (Platform.OS === "android" && offerToken == null);
+  const largePackDisabled = !connected || largePackPrice == null;
 
   const buy = useCallback(
     async (productId: string) => {
@@ -426,22 +328,6 @@ function NativeEntitlementProvider({ children }: { children: ReactNode }) {
 
       setPurchasing(true);
       try {
-        if (isUnlimitedProduct(productId)) {
-          await requestPurchase({
-            type: "subs",
-            request: {
-              apple: { sku: productId },
-              google: {
-                skus: [productId],
-                ...(offerToken
-                  ? { subscriptionOffers: [{ sku: productId, offerToken }] }
-                  : {}),
-              },
-            },
-          });
-          return;
-        }
-
         await requestPurchase({
           type: "in-app",
           request: {
@@ -460,70 +346,19 @@ function NativeEntitlementProvider({ children }: { children: ReactNode }) {
         );
       }
     },
-    [connected, offerToken, requestPurchase],
+    [connected, requestPurchase],
   );
-
-  const restore = useCallback(async () => {
-    if (!connected) {
-      Alert.alert(
-        stringsRef.current.errorTitle,
-        stringsRef.current.purchasesUnavailable,
-      );
-      return;
-    }
-
-    setPurchasing(true);
-    try {
-      await restorePurchases();
-      const outcome = await refreshStore();
-      if (!outcome.unlimited && outcome.granted === 0) {
-        Alert.alert(
-          stringsRef.current.errorTitle,
-          stringsRef.current.restoreEmpty,
-        );
-      }
-    } catch {
-      Alert.alert(
-        stringsRef.current.errorTitle,
-        stringsRef.current.restoreFailed,
-      );
-    } finally {
-      setPurchasing(false);
-    }
-  }, [connected, refreshStore, restorePurchases]);
-
-  const manage = useCallback(async () => {
-    try {
-      await deepLinkToSubscriptions({
-        skuAndroid: UNLIMITED_MONTHLY_ID,
-        packageNameAndroid: ANDROID_PACKAGE,
-      });
-    } catch {
-      Alert.alert(
-        stringsRef.current.errorTitle,
-        stringsRef.current.purchasesUnavailable,
-      );
-    }
-  }, []);
 
   const offers = useMemo(
     () =>
       buildOffers({
         strings,
-        subscriptionPrice,
-        pack100Price,
+        largePackPrice,
         pack30Price,
-        subscribeDisabled,
+        largePackDisabled,
         packsDisabled: !connected,
       }),
-    [
-      connected,
-      pack100Price,
-      pack30Price,
-      strings,
-      subscribeDisabled,
-      subscriptionPrice,
-    ],
+    [connected, largePackDisabled, largePackPrice, pack30Price, strings],
   );
 
   const value = useEntitlementValue(allowance);
@@ -534,18 +369,11 @@ function NativeEntitlementProvider({ children }: { children: ReactNode }) {
       <PaywallSheet
         visible={allowance.paywallVisible}
         credits={allowance.credits}
-        unlimited={allowance.unlimited}
         offers={offers}
         purchasing={purchasing}
         storeAvailable
         onBuy={(productId) => {
           void buy(productId);
-        }}
-        onRestore={() => {
-          void restore();
-        }}
-        onManage={() => {
-          void manage();
         }}
         onClose={allowance.closePaywall}
       />
@@ -555,15 +383,14 @@ function NativeEntitlementProvider({ children }: { children: ReactNode }) {
 
 function WebEntitlementProvider({ children }: { children: ReactNode }) {
   const strings = useI18n();
-  const allowance = useSaveAllowance(null);
+  const allowance = useSaveAllowance();
   const offers = useMemo(
     () =>
       buildOffers({
         strings,
-        subscriptionPrice: null,
-        pack100Price: null,
+        largePackPrice: null,
         pack30Price: null,
-        subscribeDisabled: true,
+        largePackDisabled: true,
         packsDisabled: true,
       }),
     [strings],
@@ -576,13 +403,10 @@ function WebEntitlementProvider({ children }: { children: ReactNode }) {
       <PaywallSheet
         visible={allowance.paywallVisible}
         credits={allowance.credits}
-        unlimited={allowance.unlimited}
         offers={offers}
         purchasing={false}
         storeAvailable={false}
         onBuy={() => undefined}
-        onRestore={() => undefined}
-        onManage={() => undefined}
         onClose={allowance.closePaywall}
       />
     </EntitlementContext.Provider>
@@ -593,7 +417,6 @@ function useEntitlementValue(allowance: SaveAllowance): EntitlementContextValue 
   return useMemo(
     () => ({
       credits: allowance.credits,
-      unlimited: allowance.unlimited,
       openPaywall: allowance.openPaywall,
       canStartCapture: allowance.canStartCapture,
       requestSave: allowance.requestSave,
@@ -605,41 +428,31 @@ function useEntitlementValue(allowance: SaveAllowance): EntitlementContextValue 
       allowance.openPaywall,
       allowance.requestSave,
       allowance.saveWithinAllowance,
-      allowance.unlimited,
     ],
   );
 }
 
 function buildOffers({
   strings,
-  subscriptionPrice,
-  pack100Price,
+  largePackPrice,
   pack30Price,
-  subscribeDisabled,
+  largePackDisabled,
   packsDisabled,
 }: {
   strings: Strings;
-  subscriptionPrice: string | null;
-  pack100Price: string | null;
+  largePackPrice: string | null;
   pack30Price: string | null;
-  subscribeDisabled: boolean;
+  largePackDisabled: boolean;
   packsDisabled: boolean;
 }) {
   return [
     {
-      id: UNLIMITED_MONTHLY_ID,
-      title: strings.subscriptionTitle,
-      detail: strings.subscriptionDetail,
-      price: subscriptionPrice,
-      primary: true,
-      disabled: subscribeDisabled,
-    },
-    {
-      id: PHOTO_PACK_100_ID,
-      title: strings.packTitle(100),
+      id: PHOTO_PACK_LARGE_ID,
+      title: strings.packTitle(100_000_000),
       detail: "",
-      price: pack100Price,
-      disabled: packsDisabled || pack100Price == null,
+      price: largePackPrice,
+      primary: true,
+      disabled: largePackDisabled,
     },
     {
       id: PHOTO_PACK_30_ID,

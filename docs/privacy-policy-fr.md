@@ -119,5 +119,6 @@ Nous pouvons mettre à jour cette politique de confidentialité. La version mise
 Pour toute question concernant cette politique de confidentialité ou nos pratiques en matière de données :
 
 - **Développeur :** kikiwen
+- **E-mail :** [xqiwen@outlook.com](mailto:xqiwen@outlook.com)
 - **GitHub :** [Ouvrir une issue](https://github.com/kikikiwen/invoice-organizer-expo/issues)
 - **Identifiant de l'application :** com.kikiwen.invoiceorganizer

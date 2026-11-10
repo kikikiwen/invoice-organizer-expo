@@ -20,14 +20,13 @@ export default function HomeScreen() {
   const { locale, toggleLocale } = useLocale();
   const album = useAlbumScreen();
   const entitlement = useEntitlement();
-  const quotaLabel = entitlement.unlimited
-    ? "∞"
-    : entitlement.credits == null || entitlement.credits > 10
+  const quotaLabel =
+    entitlement.credits == null || entitlement.credits > 10
       ? null
       : String(entitlement.credits);
-  const quotaAccessLabel = entitlement.unlimited
-    ? album.strings.quotaUnlimitedAccess
-    : album.strings.quotaRemainingAccess(entitlement.credits ?? 0);
+  const quotaAccessLabel = album.strings.quotaRemainingAccess(
+    entitlement.credits ?? 0,
+  );
 
   useEffect(() => {
     if (!album.ready) {

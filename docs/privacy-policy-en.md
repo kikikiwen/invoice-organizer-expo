@@ -119,5 +119,6 @@ We may update this Privacy Policy from time to time. The updated version will be
 If you have questions about this Privacy Policy or our data practices, contact us at:
 
 - **Developer:** kikiwen
+- **Email:** [xqiwen@outlook.com](mailto:xqiwen@outlook.com)
 - **GitHub:** [Open an issue](https://github.com/kikikiwen/invoice-organizer-expo/issues)
 - **App identifier:** com.kikiwen.invoiceorganizer
